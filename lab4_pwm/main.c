@@ -1,53 +1,64 @@
 #include "main.h"
 
 #define T_PERIOD 1000
-#define T_PULSE  990
+#define T_PULSE  999
 
-uint32_t cur_ch = 1;
-uint32_t val = T_PERIOD - 2;
+#define NUM_CHANNELS  3
+#define MIN_BRIGHT    T_PULSE
+#define MAX_BRIGHT    1
+#define MAX_STEPS	  5
 
-void EXTI0_IRQHandler (void)
+uint32_t current_channel = 1;
+uint32_t current_bright  = MIN_BRIGHT; 
+uint32_t step = (uint32_t) (T_PULSE / MAX_STEPS);
+
+void set_color_bright (uint32_t channel, uint16_t value)
+{
+	switch (channel)
+	{
+	  case 1: TIM_SetCompare1 (TIM1, value); 
+		break;
+	  case 2: TIM_SetCompare2 (TIM1, value); 	
+		break;
+	  case 3: TIM_SetCompare3 (TIM1, value); 
+		break;
+	  default:;
+	}
+}
+
+void clear_all_channels (void)
+{
+	for (int i = 1; i <= NUM_CHANNELS; i++)
+	  set_color_bright (i, MIN_BRIGHT);
+}
+
+//btn0: change bright
+void EXTI0_IRQHandler (void) 
 {
   if (EXTI_GetITStatus (EXTI_Line0) != RESET)
   {
-	if (val > 200)  val -= 200;
+	if (current_bright > step)  
+	  current_bright -= step;
 	else
-		{
-		  if (val > 10) val = 10;
-		  else val = T_PERIOD - 2;
-		}
+	  current_bright = T_PULSE;
 
-	switch (cur_ch)
-	{
-	  case 1: TIM_SetCompare1 (TIM1, val); break;
-	  case 2: TIM_SetCompare2 (TIM1, val); break;
-	  case 3: TIM_SetCompare3 (TIM1, val); break;
-	}
+	set_color_bright (current_channel, current_bright);
 
     EXTI_ClearITPendingBit (EXTI_Line0);
   }
 }
 
-void EXTI1_IRQHandler (void)
+//btn1: switch led
+void EXTI1_IRQHandler (void) 
 {
   if (EXTI_GetITStatus (EXTI_Line1) != RESET)
   {
-	switch (cur_ch)
-	{
-	  case 1: TIM_SetCompare1 (TIM1, T_PULSE); break;
-	  case 2: TIM_SetCompare2 (TIM1, T_PULSE); break;
-	  case 3: TIM_SetCompare3 (TIM1, T_PULSE); break;
-	}
+	clear_all_channels ();
 
-	cur_ch++;
-	if (cur_ch > 3) cur_ch = 1;
+	current_channel++;
+	if (current_channel > NUM_CHANNELS) current_channel = 1;
 
-	switch (cur_ch)
-	{
-	  case 1: TIM_SetCompare1 (TIM1, val); break;
-	  case 2: TIM_SetCompare2 (TIM1, val); break;
-	  case 3: TIM_SetCompare3 (TIM1, val); break;
-	}
+	set_color_bright (current_channel, current_bright);
 
     EXTI_ClearITPendingBit (EXTI_Line1);
   }
@@ -93,10 +104,12 @@ int main(void)
   /* Init Timers */
   TIM_TimeBaseInitTypeDef TIM_InitStructure;
   TIM_OCInitTypeDef TIM_OCInitStructure;
+	
+  TIM_OCStructInit(TIM_OCInitStructure);
 
   // TIM1
   RCC_APB2PeriphClockCmd (RCC_APB2Periph_TIM1, ENABLE);
-  TIM_InitStructure.TIM_Period = T_PERIOD - 1;
+  TIM_InitStructure.TIM_Period = T_PERIOD;
   TIM_InitStructure.TIM_Prescaler = 168 - 1;
   TIM_InitStructure.TIM_ClockDivision = 0;
   TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -105,7 +118,7 @@ int main(void)
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
   TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
   TIM_OCInitStructure.TIM_OCPolarity = TIM_OCNPolarity_Low;
-  TIM_OCInitStructure.TIM_Pulse = T_PULSE - 1;
+  TIM_OCInitStructure.TIM_Pulse = T_PULSE;
 
   TIM_OC1Init(TIM1, &TIM_OCInitStructure);
   TIM_OC2Init(TIM1, &TIM_OCInitStructure);
@@ -142,24 +155,10 @@ int main(void)
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 
-  /* Turn all the leds off */
-  //GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
-  //GPIO_SetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10); //red, green, blue
-
   TIM_Cmd (TIM1, ENABLE);
 
   while (1)
   {
-/*
-	  val = 1;
-	  while (val < 995)
-	  {
-		  for (i = 0; i < 2 *168000; i++);
-		  val += 10;
-		  TIM_SetCompare1 (TIM1, val);
-		  TIM_SetCompare2 (TIM1, val);
-		  TIM_SetCompare3 (TIM1, val);
-	  }
-*/
+
   }
 }
