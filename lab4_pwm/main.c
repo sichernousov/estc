@@ -6,11 +6,11 @@
 #define NUM_CHANNELS  3
 #define MIN_BRIGHT    T_PULSE
 #define MAX_BRIGHT    1
-#define MAX_STEPS	  5
+#define MAX_STEPS     5
 
-uint32_t current_channel = 1;
-uint32_t current_bright  = MIN_BRIGHT; 
-uint32_t step = (uint32_t) (T_PULSE / MAX_STEPS);
+static uint32_t current_channel = 1;
+static uint32_t current_bright  = MIN_BRIGHT; 
+static uint32_t step = (uint32_t) (T_PULSE / MAX_STEPS);
 
 void set_color_bright (uint32_t channel, uint16_t value)
 {
