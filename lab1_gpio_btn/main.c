@@ -1,5 +1,7 @@
 #include "main.h"
 
+#define DELAY  800000
+
 int main(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure;
@@ -39,31 +41,52 @@ int main(void)
   GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
   GPIO_SetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10); //red, green, blue
 
-  int GREEN_FLAG = 0;
-  int RED_FLAG = 0;
+  uint8_t WAY_FLAG = 0;
  
   while (1)
   {
-    if (GREEN_FLAG)	
-       GPIO_ResetBits(GPIOA, GPIO_Pin_9);
-    else
-       GPIO_SetBits(GPIOA, GPIO_Pin_9);
-
-    if (RED_FLAG)	
-       GPIO_ResetBits(GPIOA, GPIO_Pin_8);
-    else
-       GPIO_SetBits(GPIOA, GPIO_Pin_8);
-
+    //если нажата кнопка
     if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_0) == 0)
     {
        while (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_0) == 0);
-       GREEN_FLAG = !!(GREEN_FLAG != 1);
+       WAY_FLAG = !!(WAY_FLAG != 1);
     }
 
-    if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 0)
+    if (WAY_FLAG == 0)
     {
-       while (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 0);
-       RED_FLAG = !!(RED_FLAG != 1);
+      GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+      GPIO_SetBits(GPIOD, GPIO_Pin_12);
+      for (uint32_t i = 0; i < DELAY; i++);
+
+      GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+      GPIO_SetBits(GPIOD, GPIO_Pin_13);
+      for (uint32_t i = 0; i < DELAY; i++);
+
+      GPIO_ResetBits(GPIOD, GPIO_Pin_13);
+      GPIO_SetBits(GPIOD, GPIO_Pin_14);
+      for (uint32_t i = 0; i < DELAY; i++);
+
+      GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+      GPIO_SetBits(GPIOD, GPIO_Pin_15);
+      for (uint32_t i = 0; i < DELAY; i++);
+    }
+    else
+    {
+      GPIO_ResetBits(GPIOD, GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15);
+      GPIO_SetBits(GPIOD, GPIO_Pin_15);
+      for (uint32_t i = 0; i < DELAY; i++);
+
+      GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+      GPIO_SetBits(GPIOD, GPIO_Pin_14);
+      for (uint32_t i = 0; i < DELAY; i++);
+
+      GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+      GPIO_SetBits(GPIOD, GPIO_Pin_13);
+      for (uint32_t i = 0; i < DELAY; i++);
+
+      GPIO_ResetBits(GPIOD, GPIO_Pin_13);
+      GPIO_SetBits(GPIOD, GPIO_Pin_12);
+      for (uint32_t i = 0; i < DELAY; i++);
     }
   }
 }
