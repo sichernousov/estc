@@ -1,18 +1,29 @@
 #include "main.h"
 
-static uint8_t TIM_FLAG = 1;
-static uint8_t current_led = 0;
+#define NUM_LEDS 3
 
-void switch_led (void)
+static uint8_t WAY_FLAG    = 1; //1 = 1,2,3 ; 0 = 3,2,1
+static uint8_t current_led = 1;
+
+void switch_led (uint8_t way)
 {
-  current_led++;
-  if (current_led >= 3) current_led = 0;
-  GPIO_SetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10);
+  if (way == 0)
+  	current_led--;
+  else
+    current_led++;
+
+  if (current_led > NUM_LEDS) 
+    current_led = 1;
+  if (current_led == 0) 
+    current_led = NUM_LEDS;
+
+  GPIO_SetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10); //all leds off
   switch (current_led)
   {
-    case 0: GPIO_ResetBits (GPIOA, GPIO_Pin_8); break;
-    case 1: GPIO_ResetBits (GPIOA, GPIO_Pin_9); break;
-    case 2: GPIO_ResetBits (GPIOA, GPIO_Pin_10); break;
+    case 1: GPIO_ResetBits (GPIOA, GPIO_Pin_8); break;
+    case 2: GPIO_ResetBits (GPIOA, GPIO_Pin_9); break;
+    case 3: GPIO_ResetBits (GPIOA, GPIO_Pin_10); break;
+    default:;
   }
 }
 
@@ -20,27 +31,17 @@ void TIM2_IRQHandler (void)
 {
   if (TIM_GetITStatus (TIM2, TIM_IT_Update) != RESET)
   {
-    switch_led();
+    switch_led(WAY_FLAG);
     TIM_ClearITPendingBit (TIM2, TIM_IT_Update);
   }
 }
 
+//change direction
 void EXTI0_IRQHandler (void)
 {
   if (EXTI_GetITStatus (EXTI_Line0) != RESET)
   {
-    TIM_FLAG = !!(TIM_FLAG != 1);
-    if (TIM_FLAG) 
-    {
-      switch_led();
-      TIM2->CNT = 0;
-      TIM_Cmd (TIM2, ENABLE);
-    }
-    else 
-    {
-      TIM_Cmd (TIM2, DISABLE);
-      GPIO_SetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10);
-    }
+    WAY_FLAG = !!(WAY_FLAG != 1);
     EXTI_ClearITPendingBit (EXTI_Line0);
   }
 }
@@ -119,6 +120,7 @@ int main(void)
   GPIO_SetBits(GPIOA, GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10); //red, green, blue
 
   TIM_Cmd (TIM2, ENABLE);
+
   while (1)
   {
 
