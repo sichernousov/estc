@@ -105,7 +105,7 @@ int main(void)
   TIM_TimeBaseInitTypeDef TIM_InitStructure;
   TIM_OCInitTypeDef TIM_OCInitStructure;
 	
-  TIM_OCStructInit(TIM_OCInitStructure);
+  TIM_OCStructInit(&TIM_OCInitStructure);
 
   // TIM1
   RCC_APB2PeriphClockCmd (RCC_APB2Periph_TIM1, ENABLE);
