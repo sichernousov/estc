@@ -8,13 +8,37 @@ typedef enum {
 	chBlue  = 3
 } t_led_channel;
 
+static uint8_t color_correct (t_led_channel ch, uint8_t val)
+{
+  uint8_t result = 0;
+  switch(ch)
+	{
+	  case chRed:
+	  {
+		  result = (0xBB * val) >> 8;
+		  break;
+	  }
+	  case chGreen:
+	  {
+		  result = 0x90 + ((0x6F * val) >> 8);
+		  break;
+	  }
+	  case chBlue:
+	  {
+		  result = (0xBB * val) >> 8;
+		  break;
+	  }
+	}
+  return result;
+}
+
 static void set_channel (t_led_channel ch, uint8_t val)
 {
 	switch(ch)
 	{
-	  case chRed:   TIM_SetCompare1 (TIM1, val); break;
-	  case chGreen: TIM_SetCompare2 (TIM1, val); break;
-	  case chBlue:  TIM_SetCompare3 (TIM1, val); break;
+	  case chRed:   TIM_SetCompare1 (TIM1, color_correct(chRed,   val)); break;
+	  case chGreen: TIM_SetCompare2 (TIM1, color_correct(chGreen, val)); break;
+	  case chBlue:  TIM_SetCompare3 (TIM1, color_correct(chBlue,  val)); break;
 	}
 }
 
