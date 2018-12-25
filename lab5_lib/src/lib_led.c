@@ -1,13 +1,33 @@
+/*!
+\file
+\brief Файл с имплементацией функций
+
+Данный файл содержит в себе имплементацию основных, а также вспомогательных (статических)
+функций, используемых в библиотеке
+*/
+
 #include "../include/lib_led.h"
 
+//!Период таймера
 #define T_PERIOD  (256 - 1)
 
+//!Набор базовых цветов и соответствующих им номеров используемых каналов в ШИМ
 typedef enum {
 	chRed   = 1,
 	chGreen = 2,
 	chBlue  = 3
 } t_led_channel;
 
+/*! 
+\brief Функция цветокоррекции для светодиода
+Откорректированный диапазон значений ШИМ для каждого канала:
+	Red:   0x00 .. 0xBB
+	Green: 0x90 .. 0xFF
+    Blue:  0x00 .. 0xBB
+\param[in] ch Номер канала (1..3)
+\param[in] val Значение для ШИМ (0..255)
+\return Откорректированное значение для ШИМ 
+*/
 static uint8_t color_correct (t_led_channel ch, uint8_t val)
 {
   uint8_t result = 0;
@@ -32,6 +52,11 @@ static uint8_t color_correct (t_led_channel ch, uint8_t val)
   return result;
 }
 
+/*!
+\brief Функция установки заданного значения в нужный канал ШИМ
+\param[in] ch Номер канала (1..3)
+\param[in] val Значение для установки в ШИМ (0..255)
+*/
 static void set_channel (t_led_channel ch, uint8_t val)
 {
 	switch(ch)
@@ -42,6 +67,13 @@ static void set_channel (t_led_channel ch, uint8_t val)
 	}
 }
 
+/*!
+\brief Функция инициализации переферии.
+Необходимо вызывать перед использованием остальных функций библиотеки.
+Содержит в себе настройку 
+	GPIO (GPIOA, Pins: 8, 9, 10),
+	Timer PWM (TIM1)
+*/
 void LedInit(void)
 {
 	GPIO_InitTypeDef GPIO_InitStruct;
@@ -89,6 +121,17 @@ void LedInit(void)
 	TIM_Cmd (TIM1, ENABLE);
 }
 
+/*!
+\brief Функция устанавливает заданный в формате RGB цвет на светодиод.
+Старший байт не используется.
+Примеры использования:
+\code
+	LedSetColor (0xFF0000); //Red
+    LedSetColor (0x00FFFF); //Aqua
+    LedSetColor (0xC0C0C0); //Silver
+\endcode
+\param[in] rgb Код цвета в формате RGB (3 байта)
+*/
 void LedSetColor (uint32_t rgb)
 {
 	set_channel (chRed,   (uint8_t) ((rgb & 0xFF0000) >> 16));
@@ -96,6 +139,10 @@ void LedSetColor (uint32_t rgb)
 	set_channel (chBlue,  (uint8_t) ( rgb & 0xFF)           );
 }
 
+/*!
+\brief Функция выключения светодиода.
+Аналогична вызову функции LedSetColor (0x00);
+*/
 void LedTurnOff (void)
 {
 	LedSetColor(0x00);
