@@ -98,39 +98,29 @@ var searchBox = new SearchBox("searchBox", "search",false,'Поиск');
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Функции</h2></td></tr>
-<tr class="memitem:a1d5b4eaf7f01ae9557ba620158ebdfd9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lib__led_8h.html#a1d5b4eaf7f01ae9557ba620158ebdfd9">LedInit</a> (void)</td></tr>
-<tr class="memdesc:a1d5b4eaf7f01ae9557ba620158ebdfd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Функция инициализации переферии.  <a href="#a1d5b4eaf7f01ae9557ba620158ebdfd9">Подробнее...</a><br/></td></tr>
+<tr class="memitem:a1d5b4eaf7f01ae9557ba620158ebdfd9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1d5b4eaf7f01ae9557ba620158ebdfd9"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lib__led_8h.html#a1d5b4eaf7f01ae9557ba620158ebdfd9">LedInit</a> (void)</td></tr>
+<tr class="memdesc:a1d5b4eaf7f01ae9557ba620158ebdfd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Функция инициализации переферии. Необходимо вызывать перед использованием остальных функций библиотеки. <br/>
+ Содержит в себе настройку <br/>
+ GPIO (GPIOA, Pins: 8, 9, 10), <br/>
+ Timer PWM (TIM1) <br/>
+ <br/></td></tr>
 <tr class="separator:a1d5b4eaf7f01ae9557ba620158ebdfd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c592b4117017697ee3aa654aae83381"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lib__led_8h.html#a4c592b4117017697ee3aa654aae83381">LedSetColor</a> (uint32_t rgb)</td></tr>
-<tr class="memdesc:a4c592b4117017697ee3aa654aae83381"><td class="mdescLeft">&#160;</td><td class="mdescRight">Функция устанавливает заданный в формате RGB цвет на светодиод.  <a href="#a4c592b4117017697ee3aa654aae83381">Подробнее...</a><br/></td></tr>
+<tr class="memdesc:a4c592b4117017697ee3aa654aae83381"><td class="mdescLeft">&#160;</td><td class="mdescRight">Функция устанавливает заданный в формате RGB цвет на светодиод. <br/>
+ Старший байт не используется. <br/>
+ Примеры использования:  <a href="#a4c592b4117017697ee3aa654aae83381">Подробнее...</a><br/></td></tr>
 <tr class="separator:a4c592b4117017697ee3aa654aae83381"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2114509b7fd9f17c610fd2230c23902f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lib__led_8h.html#a2114509b7fd9f17c610fd2230c23902f">LedTurnOff</a> (void)</td></tr>
-<tr class="memdesc:a2114509b7fd9f17c610fd2230c23902f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Функция выключения светодиода.  <a href="#a2114509b7fd9f17c610fd2230c23902f">Подробнее...</a><br/></td></tr>
+<tr class="memitem:a2114509b7fd9f17c610fd2230c23902f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2114509b7fd9f17c610fd2230c23902f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lib__led_8h.html#a2114509b7fd9f17c610fd2230c23902f">LedTurnOff</a> (void)</td></tr>
+<tr class="memdesc:a2114509b7fd9f17c610fd2230c23902f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Функция выключения светодиода. <br/>
+ Аналогична вызову функции LedSetColor(0x00). <br/></td></tr>
 <tr class="separator:a2114509b7fd9f17c610fd2230c23902f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Подробное описание</h2>
 <div class="textblock"><p>Заголовочный файл библиотеки с описанием функций </p>
 <p>Данный файл содержит в себе определения основных функций, используемых в библиотеке </p>
 </div><h2 class="groupheader">Функции</h2>
-<a class="anchor" id="a1d5b4eaf7f01ae9557ba620158ebdfd9"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void LedInit </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Функция инициализации переферии. </p>
-<p>Функция инициализации переферии. </p>
-
-</div>
-</div>
 <a class="anchor" id="a4c592b4117017697ee3aa654aae83381"></a>
 <div class="memitem">
 <div class="memproto">
@@ -145,8 +135,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Поиск');
       </table>
 </div><div class="memdoc">
 
-<p>Функция устанавливает заданный в формате RGB цвет на светодиод. </p>
-<p>Функция устанавливает заданный в формате RGB цвет на светодиод.</p>
+<p>Функция устанавливает заданный в формате RGB цвет на светодиод. <br/>
+ Старший байт не используется. <br/>
+ Примеры использования: </p>
 <div class="fragment"><div class="line"><a class="code" href="lib__led_8h.html#a4c592b4117017697ee3aa654aae83381">LedSetColor</a> (0xFF0000); <span class="comment">//Red</span></div>
 <div class="line"><a class="code" href="lib__led_8h.html#a4c592b4117017697ee3aa654aae83381">LedSetColor</a> (0x00FFFF); <span class="comment">//Aqua</span></div>
 <div class="line"><a class="code" href="lib__led_8h.html#a4c592b4117017697ee3aa654aae83381">LedSetColor</a> (0xC0C0C0); <span class="comment">//Silver</span></div>
@@ -156,25 +147,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Поиск');
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a class="anchor" id="a2114509b7fd9f17c610fd2230c23902f"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void LedTurnOff </td>
-          <td>(</td>
-          <td class="paramtype">void&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Функция выключения светодиода. </p>
-<p>Функция выключения светодиода. </p>
 
 </div>
 </div>

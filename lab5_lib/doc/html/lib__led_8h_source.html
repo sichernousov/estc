@@ -93,16 +93,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Поиск');
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;stm32f4xx.h&gt;</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">// Функция инициализации переферии.</span></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keywordtype">void</span> <a class="code" href="lib__led_8h.html#a1d5b4eaf7f01ae9557ba620158ebdfd9">LedInit</a>(<span class="keywordtype">void</span>);</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment">// Функция устанавливает заданный в формате RGB цвет на светодиод.</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keywordtype">void</span> <a class="code" href="lib__led_8h.html#a4c592b4117017697ee3aa654aae83381">LedSetColor</a> (uint32_t rgb);</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">// Функция выключения светодиода.</span></div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keywordtype">void</span> <a class="code" href="lib__led_8h.html#a2114509b7fd9f17c610fd2230c23902f">LedTurnOff</a> (<span class="keywordtype">void</span>);</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="lib__led_8h_html_a2114509b7fd9f17c610fd2230c23902f"><div class="ttname"><a href="lib__led_8h.html#a2114509b7fd9f17c610fd2230c23902f">LedTurnOff</a></div><div class="ttdeci">void LedTurnOff(void)</div><div class="ttdoc">Функция выключения светодиода. </div><div class="ttdef"><b>Definition:</b> lib_led.c:146</div></div>
-<div class="ttc" id="lib__led_8h_html_a4c592b4117017697ee3aa654aae83381"><div class="ttname"><a href="lib__led_8h.html#a4c592b4117017697ee3aa654aae83381">LedSetColor</a></div><div class="ttdeci">void LedSetColor(uint32_t rgb)</div><div class="ttdoc">Функция устанавливает заданный в формате RGB цвет на светодиод. </div><div class="ttdef"><b>Definition:</b> lib_led.c:135</div></div>
-<div class="ttc" id="lib__led_8h_html_a1d5b4eaf7f01ae9557ba620158ebdfd9"><div class="ttname"><a href="lib__led_8h.html#a1d5b4eaf7f01ae9557ba620158ebdfd9">LedInit</a></div><div class="ttdeci">void LedInit(void)</div><div class="ttdoc">Функция инициализации переферии. </div><div class="ttdef"><b>Definition:</b> lib_led.c:77</div></div>
+<div class="ttc" id="lib__led_8h_html_a2114509b7fd9f17c610fd2230c23902f"><div class="ttname"><a href="lib__led_8h.html#a2114509b7fd9f17c610fd2230c23902f">LedTurnOff</a></div><div class="ttdeci">void LedTurnOff(void)</div><div class="ttdoc">Функция выключения светодиода.   Аналогична вызову функции LedSetColor(0x00). </div><div class="ttdef"><b>Definition:</b> lib_led.c:145</div></div>
+<div class="ttc" id="lib__led_8h_html_a4c592b4117017697ee3aa654aae83381"><div class="ttname"><a href="lib__led_8h.html#a4c592b4117017697ee3aa654aae83381">LedSetColor</a></div><div class="ttdeci">void LedSetColor(uint32_t rgb)</div><div class="ttdoc">Функция устанавливает заданный в формате RGB цвет на светодиод.   Старший байт не используется...</div><div class="ttdef"><b>Definition:</b> lib_led.c:134</div></div>
+<div class="ttc" id="lib__led_8h_html_a1d5b4eaf7f01ae9557ba620158ebdfd9"><div class="ttname"><a href="lib__led_8h.html#a1d5b4eaf7f01ae9557ba620158ebdfd9">LedInit</a></div><div class="ttdeci">void LedInit(void)</div><div class="ttdoc">Функция инициализации переферии. Необходимо вызывать перед использованием остальных функций библиотек...</div><div class="ttdef"><b>Definition:</b> lib_led.c:76</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
