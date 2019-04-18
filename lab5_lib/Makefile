@@ -12,7 +12,7 @@ SRCS = $(wildcard  $(addsuffix /*.c, $(SRC_DIR)))
 OBJS = $(patsubst %.c, %.o, $(SRCS))
 DEPS = $(patsubst %.c, %.d, $(SRCS))
 
-$(LIB): $(STARTUP) $(OBJS)
+$(LIB): $(OBJS)
 	@echo "Linking library $@"
 	$(MAKE_LIBRARY)
 

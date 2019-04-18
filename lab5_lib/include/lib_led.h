@@ -22,7 +22,7 @@ uint32_t LedGetColor (void);
 void LedTurnOff (void);
 void LedTurnOn (void);
 void LedToggle (void);
-bool LedGetStatus (void);
+uint8_t LedGetStatus (void);
 
 //Функции управления яркостью светодиода
 void LedBrightUp (void);

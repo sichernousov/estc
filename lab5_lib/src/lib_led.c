@@ -19,7 +19,7 @@ typedef enum {
 } t_led_channel;
 
 //!Глобальные переменные
-static bool     LED_STATUS = true; //false - off, true - on
+static uint8_t  LED_STATUS = 1; //0 - off, 1 - on
 static uint32_t LED_CUR_COLOR = 0x000000; 
 
 /*! 
@@ -155,16 +155,16 @@ uint32_t LedGetColor (void)
 */
 void LedTurnOn (void)
 {
-  	LED_STATUS = true;
+  	LED_STATUS = 1;
 	LedSetColor (LED_CUR_COLOR);
 }
 
 void LedTurnOff (void)
 {
-  	LED_STATUS = false;
-	set_channel (chRed,   (uint8_t) (0 >> 16));
-	set_channel (chGreen, (uint8_t) (0 >> 8) );
-	set_channel (chBlue,  (uint8_t) (0       );
+  	LED_STATUS = 0;
+	set_channel (chRed,   0);
+	set_channel (chGreen, 0);
+	set_channel (chBlue,  0);
 }
 
 void LedToggle (void)
@@ -173,7 +173,7 @@ void LedToggle (void)
 	else LedTurnOn();
 }
 
-bool LedGetStatus (void)
+uint8_t LedGetStatus (void)
 {
 	return LED_STATUS;
 }
