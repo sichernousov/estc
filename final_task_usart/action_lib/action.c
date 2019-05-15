@@ -11,7 +11,7 @@ void init_system (void)
 {
   //init periph
   init_leds();
-  //init_btns();
+  init_btns();
   init_tim();
   //init_usart();
 
@@ -36,7 +36,8 @@ void init_system (void)
 uint8_t set_bright (led_t led, uint8_t val)
 {
   if (val > 100) return ERROR_CONST;
-  if (set_pulse(led, perc_to_pulse(val)) == OK_CONST) {
+  uint8_t tmp_val = 100 - val;
+  if (set_pulse(led, perc_to_pulse(tmp_val)) == OK_CONST) {
       switch (led)
       {
         case led1:

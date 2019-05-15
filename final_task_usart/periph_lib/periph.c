@@ -3,7 +3,7 @@
 
 #include <periph.h>
 
-static const uint16_t g_pwm_tim_period = 300;
+static const uint16_t g_pwm_tim_period = 100;
 static uint16_t g_simple_tim_period = TIM_PERIOD_1_SEC;
 static uint8_t g_dur_tim_sec = 1;
 
@@ -14,9 +14,9 @@ void init_leds(void)
     GPIO_StructInit(&GPIO_InitStructure);
 
     //PWM leds
-    GPIO_PinAFConfig (GPIOD, GPIO_PinSource12, GPIO_AF_TIM1);
-    GPIO_PinAFConfig (GPIOD, GPIO_PinSource13, GPIO_AF_TIM1);
-    GPIO_PinAFConfig (GPIOD, GPIO_PinSource14, GPIO_AF_TIM1);
+    GPIO_PinAFConfig (GPIOD, GPIO_PinSource12, GPIO_AF_TIM4);
+    GPIO_PinAFConfig (GPIOD, GPIO_PinSource13, GPIO_AF_TIM4);
+    GPIO_PinAFConfig (GPIOD, GPIO_PinSource14, GPIO_AF_TIM4);
 
     GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_12 | GPIO_Pin_13 | GPIO_Pin_14;
     GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
@@ -72,37 +72,9 @@ void init_btns(void)
 
 void init_tim(void)
 {
-    //PWM Timer (T1)
-    RCC_APB2PeriphClockCmd (RCC_APB2Periph_TIM1, ENABLE);
-
-    TIM_TimeBaseInitTypeDef TIM_InitStructure;
-    TIM_OCInitTypeDef TIM_OCInitStructure;
-    TIM_OCStructInit(&TIM_OCInitStructure);
-
-    TIM_InitStructure.TIM_Period = g_pwm_tim_period;
-    TIM_InitStructure.TIM_Prescaler = 168 - 1;
-    TIM_InitStructure.TIM_ClockDivision = 0;
-    TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit (TIM1, &TIM_InitStructure);
-
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCNPolarity_Low;
-    TIM_OCInitStructure.TIM_Pulse = 0;
-
-    TIM_OC1Init(TIM1, &TIM_OCInitStructure);
-    TIM_OC2Init(TIM1, &TIM_OCInitStructure);
-    TIM_OC3Init(TIM1, &TIM_OCInitStructure);
-
-    TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
-    TIM_OC2PreloadConfig(TIM1, TIM_OCPreload_Enable);
-    TIM_OC3PreloadConfig(TIM1, TIM_OCPreload_Enable);
-
-    TIM_CtrlPWMOutputs (TIM1, ENABLE);
-    TIM_Cmd (TIM1, ENABLE);
-
-/*
     //Simple Timer (T2)
+    TIM_TimeBaseInitTypeDef TIM_InitStructure;
+
     // TIM2
     RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM2, ENABLE);
     TIM_InitStructure.TIM_Period = g_simple_tim_period - 1;
@@ -110,15 +82,15 @@ void init_tim(void)
     TIM_InitStructure.TIM_ClockDivision = 0;
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit (TIM2, &TIM_InitStructure);
-
+/*
     NVIC_InitTypeDef NVIC_InitStructure;
     TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-
+*/
     //Duration Timer (T3)
     RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM3, ENABLE);
     TIM_InitStructure.TIM_Period = (g_dur_tim_sec * TIM_PERIOD_1_SEC) - 1;
@@ -126,14 +98,44 @@ void init_tim(void)
     TIM_InitStructure.TIM_ClockDivision = 0;
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit (TIM3, &TIM_InitStructure);
-
-    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+/*
+    TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
     NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-    */
+*/
+    //PWM Timer (T4)
+    RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM4, ENABLE);
+
+    TIM_OCInitTypeDef TIM_OCInitStructure;
+    TIM_OCStructInit(&TIM_OCInitStructure);
+
+    TIM_InitStructure.TIM_Period = g_pwm_tim_period;
+    TIM_InitStructure.TIM_Prescaler = 168 - 1;
+    TIM_InitStructure.TIM_ClockDivision = 0;
+    TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit (TIM4, &TIM_InitStructure);
+
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCNPolarity_Low;
+    TIM_OCInitStructure.TIM_Pulse = 0;
+
+    TIM_OC1Init(TIM4, &TIM_OCInitStructure);
+    TIM_OC1PreloadConfig(TIM4, TIM_OCPreload_Enable);
+
+    TIM_OCInitStructure.TIM_Pulse = g_pwm_tim_period/2;
+    TIM_OC2Init(TIM4, &TIM_OCInitStructure);
+    TIM_OC2PreloadConfig(TIM4, TIM_OCPreload_Enable);
+
+    TIM_OCInitStructure.TIM_Pulse = g_pwm_tim_period-5;
+    TIM_OC3Init(TIM4, &TIM_OCInitStructure);
+    TIM_OC3PreloadConfig(TIM4, TIM_OCPreload_Enable);
+
+    TIM_CtrlPWMOutputs (TIM4, ENABLE);
+    TIM_Cmd (TIM4, ENABLE);
 }
 
 void init_usart(void)
@@ -185,15 +187,15 @@ uint8_t set_pulse(led_t led, uint16_t value)
         switch (led)
         {
           case led1:
-            TIM_SetCompare1 (TIM1, value);
+            TIM_SetCompare1 (TIM4, value);
           break;
 
           case led2:
-            TIM_SetCompare2 (TIM1, value);
+            TIM_SetCompare2 (TIM4, value);
           break;
 
           case led3:
-            TIM_SetCompare3 (TIM1, value);
+            TIM_SetCompare3 (TIM4, value);
           break;
        }
     }
@@ -204,7 +206,7 @@ uint8_t set_pulse(led_t led, uint16_t value)
 
 uint16_t perc_to_pulse(uint8_t percents)
 {
-    return g_pwm_tim_period / 100 * percents;
+    return (g_pwm_tim_period / 100 * percents);
 }
 
 void set_duration(uint8_t val)
@@ -224,11 +226,11 @@ void set_interval(uint16_t val)
 }
 
 void pwm_tim_enable (void) {
-    TIM_Cmd (TIM1, ENABLE);
+    TIM_Cmd (TIM4, ENABLE);
 }
 
 void pwm_tim_disable (void) {
-    TIM_Cmd (TIM1, DISABLE);
+    TIM_Cmd (TIM4, DISABLE);
 }
 
 void simple_tim_enable (void) {
@@ -236,7 +238,7 @@ void simple_tim_enable (void) {
 }
 
 void simple_tim_disable (void) {
-    TIM_Cmd (TIM1, DISABLE);
+    TIM_Cmd (TIM2, DISABLE);
 }
 
 void duration_tim_enable (void) {
