@@ -1,9 +1,9 @@
 #ifndef PERIPH_C
 #define PERIPH_C
 
-#include "periph.h"
+#include <periph.h>
 
-static const uint16_t g_pwm_tim_period = 1000;
+static const uint16_t g_pwm_tim_period = 300;
 static uint16_t g_simple_tim_period = TIM_PERIOD_1_SEC;
 static uint8_t g_dur_tim_sec = 1;
 
@@ -74,6 +74,7 @@ void init_tim(void)
 {
     //PWM Timer (T1)
     RCC_APB2PeriphClockCmd (RCC_APB2Periph_TIM1, ENABLE);
+
     TIM_TimeBaseInitTypeDef TIM_InitStructure;
     TIM_OCInitTypeDef TIM_OCInitStructure;
     TIM_OCStructInit(&TIM_OCInitStructure);
@@ -84,10 +85,10 @@ void init_tim(void)
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit (TIM1, &TIM_InitStructure);
 
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
+    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCNPolarity_Low;
-    TIM_OCInitStructure.TIM_Pulse = g_pwm_tim_period - 1;
+    TIM_OCInitStructure.TIM_Pulse = 0;
 
     TIM_OC1Init(TIM1, &TIM_OCInitStructure);
     TIM_OC2Init(TIM1, &TIM_OCInitStructure);
@@ -98,6 +99,8 @@ void init_tim(void)
     TIM_OC3PreloadConfig(TIM1, TIM_OCPreload_Enable);
 
     TIM_CtrlPWMOutputs (TIM1, ENABLE);
+    TIM_Cmd (TIM1, ENABLE);
+
 /*
     //Simple Timer (T2)
     // TIM2

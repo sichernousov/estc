@@ -3,6 +3,10 @@
 
 #include <stm32f4xx.h>
 
+#include <periph.c>
+
+#include <action.c>
+
 /* #if defined (USE_STM324xG_EVAL) */
 /*   #include "stm324xg_eval.h" */
 

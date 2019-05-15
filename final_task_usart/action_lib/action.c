@@ -1,5 +1,4 @@
-#include "action.h"
-#include <periph.c>
+#include <action.h>
 
 static sys_status_t system_status;
 
