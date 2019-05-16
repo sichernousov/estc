@@ -81,11 +81,11 @@ void tim_set_interval (uint16_t val)
 
 void tim_set_duration (uint8_t val)
 {
-  set_duration(val);
   if (val == 0) {
     duration_tim_disable();
   }
   else {
+    set_duration(val);
     duration_tim_enable();
   }
   system_status.tim.duration = val;

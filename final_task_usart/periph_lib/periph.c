@@ -136,6 +136,8 @@ void init_tim(void)
 void init_usart(void)
 {
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+
     GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_StructInit(&GPIO_InitStructure);
 
@@ -155,6 +157,7 @@ void init_usart(void)
 
     USART_InitTypeDef USART_InitStructure;
     USART_StructInit(&USART_InitStructure);
+
     USART_InitStructure.USART_BaudRate = 9600;// скорость
     USART_InitStructure.USART_WordLength = USART_WordLength_8b; //8 бит данных
     USART_InitStructure.USART_StopBits = USART_StopBits_1; //один стоп бит
@@ -209,7 +212,13 @@ void set_duration(uint8_t val)
    g_dur_tim_sec = val;
    if (val > 0) {
        TIM_SetCounter(TIM3, 0);
-       TIM_SetPeriod(TIM3, (g_dur_tim_sec * TIM_PERIOD_1_SEC));
+
+       TIM_TimeBaseInitTypeDef TIM_InitStructure;
+       TIM_InitStructure.TIM_Period = (g_dur_tim_sec * TIM_PERIOD_1_SEC) - 1;
+       TIM_InitStructure.TIM_Prescaler = 42000 - 1; //500us
+       TIM_InitStructure.TIM_ClockDivision = 0;
+       TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+       TIM_TimeBaseInit (TIM3, &TIM_InitStructure);
    }
 }
 
@@ -217,7 +226,13 @@ void set_interval(uint16_t val)
 {
     g_interval_tim_period = val;
     TIM_SetCounter(TIM2, 0);
-    TIM_SetPeriod(TIM2,  g_interval_tim_period);
+
+    TIM_TimeBaseInitTypeDef TIM_InitStructure;
+    TIM_InitStructure.TIM_Period = g_interval_tim_period - 1;
+    TIM_InitStructure.TIM_Prescaler = 42000 - 1; //500us
+    TIM_InitStructure.TIM_ClockDivision = 0;
+    TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
+    TIM_TimeBaseInit (TIM3, &TIM_InitStructure);
 }
 
 void pwm_tim_enable (void) {
