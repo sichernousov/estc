@@ -11,6 +11,26 @@ void EXTI0_IRQHandler (void)
   }
 }
 
+//interval timer handler
+void TIM2_IRQHandler(void)
+{
+  if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
+  {
+    TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+    GPIO_ToggleBits(GPIOD, GPIO_Pin_15);
+  }
+}
+
+//duration timer handler
+void TIM3_IRQHandler(void)
+{
+  if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
+  {
+    TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+    TIM_Cmd(TIM2, DISABLE);
+    TIM_Cmd(TIM3, DISABLE);  
+  }
+}
 
 void USART1_IRQHandler()
 {
@@ -37,7 +57,6 @@ int main(void)
     (void)set_bright(led1, perc);
     (void)set_bright(led2, perc);
     (void)set_bright(led3, perc);
-    //GPIO_SetBits(GPIOD, GPIO_Pin_15);
 
     for (volatile int i = 0; i<350000; i++);
     perc += 3;
@@ -45,7 +64,6 @@ int main(void)
     (void)set_bright(led1, perc);
     (void)set_bright(led2, perc);
     (void)set_bright(led3, perc);
-    //GPIO_ResetBits(GPIOD, GPIO_Pin_15);
 
     for (volatile int i = 0; i<350000; i++);
   }

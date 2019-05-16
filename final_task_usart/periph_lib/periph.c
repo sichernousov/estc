@@ -4,8 +4,8 @@
 #include <periph.h>
 
 static const uint16_t g_pwm_tim_period = 100;
-static uint16_t g_simple_tim_period = TIM_PERIOD_1_SEC;
-static uint8_t g_dur_tim_sec = 1;
+static uint16_t g_interval_tim_period = TIM_PERIOD_1_SEC;
+static uint8_t g_dur_tim_sec = 10;
 
 void init_leds(void)
 {
@@ -65,48 +65,45 @@ void init_btns(void)
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 }
 
 void init_tim(void)
 {
-    //Simple Timer (T2)
     TIM_TimeBaseInitTypeDef TIM_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
 
-    // TIM2
+    //Interval Timer (TIM2)
     RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM2, ENABLE);
-    TIM_InitStructure.TIM_Period = g_simple_tim_period - 1;
+    TIM_InitStructure.TIM_Period = g_interval_tim_period - 1;
     TIM_InitStructure.TIM_Prescaler = 42000 - 1; //500us
     TIM_InitStructure.TIM_ClockDivision = 0;
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit (TIM2, &TIM_InitStructure);
-/*
-    NVIC_InitTypeDef NVIC_InitStructure;
-    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 10;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-*/
-    //Duration Timer (T3)
+
+    //Duration Timer (TIM3)
     RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM3, ENABLE);
     TIM_InitStructure.TIM_Period = (g_dur_tim_sec * TIM_PERIOD_1_SEC) - 1;
     TIM_InitStructure.TIM_Prescaler = 42000 - 1; //500us
     TIM_InitStructure.TIM_ClockDivision = 0;
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit (TIM3, &TIM_InitStructure);
-/*
-    TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+
     NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 10;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-*/
-    //PWM Timer (T4)
+
+    //PWM Timer (TIM4)
     RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM4, ENABLE);
 
     TIM_OCInitTypeDef TIM_OCInitStructure;
@@ -121,16 +118,14 @@ void init_tim(void)
     TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCNPolarity_Low;
-    TIM_OCInitStructure.TIM_Pulse = 0;
+    TIM_OCInitStructure.TIM_Pulse = g_pwm_tim_period;
 
     TIM_OC1Init(TIM4, &TIM_OCInitStructure);
     TIM_OC1PreloadConfig(TIM4, TIM_OCPreload_Enable);
 
-    TIM_OCInitStructure.TIM_Pulse = g_pwm_tim_period/2;
     TIM_OC2Init(TIM4, &TIM_OCInitStructure);
     TIM_OC2PreloadConfig(TIM4, TIM_OCPreload_Enable);
 
-    TIM_OCInitStructure.TIM_Pulse = g_pwm_tim_period-5;
     TIM_OC3Init(TIM4, &TIM_OCInitStructure);
     TIM_OC3PreloadConfig(TIM4, TIM_OCPreload_Enable);
 
@@ -220,9 +215,9 @@ void set_duration(uint8_t val)
 
 void set_interval(uint16_t val)
 {
-    g_simple_tim_period = val;
+    g_interval_tim_period = val;
     TIM_SetCounter(TIM2, 0);
-    TIM_SetPeriod(TIM2,  g_simple_tim_period);
+    TIM_SetPeriod(TIM2,  g_interval_tim_period);
 }
 
 void pwm_tim_enable (void) {
@@ -233,19 +228,25 @@ void pwm_tim_disable (void) {
     TIM_Cmd (TIM4, DISABLE);
 }
 
-void simple_tim_enable (void) {
+void interval_tim_enable (void) {
+    TIM_SetCounter(TIM2, 0);
+    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
     TIM_Cmd (TIM2, ENABLE);
 }
 
-void simple_tim_disable (void) {
+void interval_tim_disable (void) {
+    TIM_ITConfig(TIM2, TIM_IT_Update, DISABLE);
     TIM_Cmd (TIM2, DISABLE);
 }
 
 void duration_tim_enable (void) {
+    TIM_SetCounter(TIM3, 0);
+    TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
     TIM_Cmd (TIM3, ENABLE);
 }
 
 void duration_tim_disable (void) {
+    TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
     TIM_Cmd (TIM3, DISABLE);
 }
 

@@ -61,7 +61,7 @@ uint8_t set_bright (led_t led, uint8_t val)
 void tim_start (void)
 {
   system_status.tim.status = 1;
-  simple_tim_enable();
+  interval_tim_enable();
   if (system_status.tim.duration > 0)
       duration_tim_enable();
 }
@@ -69,7 +69,7 @@ void tim_start (void)
 void tim_stop (void)
 {
   system_status.tim.status = 0;
-  simple_tim_disable();
+  interval_tim_disable();
   duration_tim_disable();
 }
 

@@ -24,8 +24,8 @@ uint16_t perc_to_pulse(uint8_t percents);
 
 void pwm_tim_enable (void);
 void pwm_tim_disable (void);
-void simple_tim_enable (void);
-void simple_tim_disable (void);
+void interval_tim_enable (void);
+void interval_tim_disable (void);
 void duration_tim_enable (void);
 void duration_tim_disable (void);
 
