@@ -13,7 +13,7 @@ void init_system (void)
   init_leds();
   init_btns();
   init_tim();
-  //init_usart();
+  init_usart();
 
   //init struct
   system_status.led1.status = 0;

@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <periph.c>
+#include <periph.c> //ToDo
 
-#include <action.c>
+#include <action.c> //ToDo
 
 #define LEN_DATA_CMD    1
 #define LEN_DATA_PARAM  3
@@ -33,20 +33,13 @@ typedef struct {
 } packet_t;
 #define LEN_DATA_PACKET (sizeof(packet_t))
 
-//input bufs and vars
-static packet_t * g_usart_input_buf[MAX_NUM_PACKETS] = {0};
-static uint8_t g_cur_in_index = 0;
-static uint8_t g_packs_for_proc = 0;
+#include <queue.c> //ToDo
 
-//output bufs and vars
-static packet_t * g_usart_output_buf[MAX_NUM_PACKETS] = {0};
-static uint8_t g_cur_out_index = 0;
-static uint8_t g_packs_for_send = 0;
+TQueue input_q = {NULL, NULL} ;
+TQueue output_q = {NULL, NULL};
 
 //funcs
 uint8_t   do_cmd (packet_t * packet);
-packet_t* get_next_packet (void);
-void send_packet(packet_t* p);
 
 /* #if defined (USE_STM324xG_EVAL) */
 /*   #include "stm324xg_eval.h" */

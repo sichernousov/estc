@@ -1,29 +1,17 @@
 #include "main.h"
 
-void send_packet(packet_t* p)
-{
-  g_usart_output_buf[g_cur_out_index] = p;
-  g_cur_out_index++;
-  g_packs_for_send++;
-  if (g_packs_for_send == 1) USART_ITConfig(USART1, USART_IT_TC, ENABLE);
-};
-
 void EXTI0_IRQHandler (void)
 {
   //если нажата кнопка
   if (EXTI_GetITStatus (EXTI_Line0) != RESET)
   {
-    static uint8_t debounce = 0;
-    if (debounce == 0)
-    {
-      debounce = 1;
-      packet_t * p = (packet_t *) malloc(LEN_DATA_PACKET);
-      p->cmd = CMD_TimStart;
-      memset(p->params, 0, LEN_DATA_PARAM);
-      send_packet(p);
-    }
-    //USART_ITConfig (USART1, USART_IT_TC, ENABLE);
     EXTI_ClearITPendingBit (EXTI_Line0);
+    //тестовый пакет
+    packet_t* p = (packet_t*) malloc(LEN_DATA_PACKET);
+    p->cmd = CMD_LedBrightInc;
+    memset(p->params, 0, LEN_DATA_PARAM);
+    QPush(&output_q, p);
+    USART_ITConfig(USART1, USART_IT_TC, ENABLE);
   }
 }
 
@@ -51,58 +39,56 @@ void USART1_IRQHandler()
 {
   if (USART_GetITStatus(USART1, USART_IT_TC) != RESET)
   {
-      static uint8_t SEND_PROGRESS = 0;
-      static uint8_t send_data_cnt = 0;
-      static uint8_t * p_out = NULL;
-      static uint8_t out_index = 0;
+    USART_ClearITPendingBit(USART1, USART_IT_TC);
+    uint8_t data = 0xFF;
+    USART_SendData(USART1, data);
+    GPIO_SetBits(GPIOD, GPIO_Pin_15);
+    USART_ITConfig(USART1, USART_IT_TC, DISABLE);
+    /*
+    static uint8_t SEND_PROGRESS = 0;
+    static uint8_t send_data_cnt = 0;
+    static uint8_t * p_out = NULL;
 
-      if (g_packs_for_send > 0)
-      {
+    if ((output_q.head == NULL) && (SEND_PROGRESS != 0)) USART_ITConfig(USART1, USART_IT_TC, DISABLE);//???hz;
+    else
+    {
         //начало отправки нового пакета
-        if (SEND_PROGRESS == 0) 
+        if ((SEND_PROGRESS == 0) && (output_q.head != NULL))
         {
-          send_data_cnt = 0;
-	  SEND_PROGRESS = 1;
-
-          p_out = (uint8_t *) malloc(LEN_DATA_PACKET);
-          memcpy(p_out, g_usart_output_buf[out_index], LEN_DATA_PACKET);
-          free(g_usart_output_buf[out_index]);
-          out_index++;
-          if (out_index == MAX_NUM_PACKETS) out_index = 0;
-
-          USART_SendData(USART1, *(p_out + send_data_cnt));
-          send_data_cnt++;
+            send_data_cnt = 0;
+            SEND_PROGRESS = 1;
+            p_out = (uint8_t *) QPop(&output_q);
+            USART_SendData(USART1, *(p_out + send_data_cnt));
+            send_data_cnt++;
         }
-        else 
+        //доотправка
+        else if (SEND_PROGRESS != 0)
         {
-          //доотправка
-          USART_SendData(USART1, *(p_out + send_data_cnt));
-          send_data_cnt++;
-          if (send_data_cnt == LEN_DATA_PACKET)
-          {
-            free(p_out);
-            SEND_PROGRESS = 0;
-            g_packs_for_send--;
-          }         
+            USART_SendData(USART1, *(p_out + send_data_cnt));
+            send_data_cnt++;
+            if (send_data_cnt == LEN_DATA_PACKET)
+            {
+              free(p_out);
+              SEND_PROGRESS = 0;
+            }
         }
-      }
-      else USART_ITConfig(USART1, USART_IT_TC, DISABLE);//???hz
-
-      USART_ClearITPendingBit(USART1, USART_IT_TC);
+    }
+    */
   }
 
   if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
   {
+      USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+      /*
       static uint8_t REC_PROGRESS = 0;
       static uint8_t rec_data_cnt = 0;
       static uint8_t * p_in = NULL;
-      static uint8_t in_index = 0;
 
       //начинаем принимать новый пакет
-      if (REC_PROGRESS == 0)
+      if (REC_PROGRESS == 0) //ToDo - работает если LEN_DATA_PACKET>1
       {
         rec_data_cnt = 0;
-	REC_PROGRESS = 1;
+        REC_PROGRESS = 1;
 
         p_in = (uint8_t *) malloc(LEN_DATA_PACKET);
 
@@ -116,15 +102,14 @@ void USART1_IRQHandler()
         rec_data_cnt++;
         if (rec_data_cnt == LEN_DATA_PACKET)
         {
-          g_usart_input_buf[in_index] = (packet_t*) p_in;
-          in_index++;
-          if (in_index == MAX_NUM_PACKETS) in_index = 0;
-          g_packs_for_proc++;
+          QPush(&input_q, (packet_t*) p_in);
           REC_PROGRESS = 0;
         }
-      }
-	
-      USART_ClearITPendingBit(USART1, USART_IT_RXNE);
+      } 
+      */
+      uint8_t data = USART_ReceiveData(USART1);
+      GPIO_SetBits(GPIOD, GPIO_Pin_15);
+      USART_ITConfig (USART1, USART_IT_RXNE, DISABLE);
   }
 }
 
@@ -138,7 +123,7 @@ uint8_t do_cmd (packet_t * packet)
     break;
 
     case CMD_LedBrightInc:
-      ;//ToDo
+      GPIO_SetBits(GPIOD, GPIO_Pin_15);//ToDo
     break;
 
     case CMD_LedBrightDec:
@@ -186,28 +171,20 @@ uint8_t do_cmd (packet_t * packet)
   return res;
 }
 
-packet_t * get_next_packet ()
-{
-  while (g_packs_for_proc == 0);
-  g_packs_for_proc--;
-
-  packet_t * res = (packet_t *) malloc(LEN_DATA_PACKET);
-  memcpy(res, g_usart_input_buf[g_cur_in_index], LEN_DATA_PACKET);
- 
-  g_cur_in_index++;
-  if (g_cur_in_index == MAX_NUM_PACKETS) g_cur_in_index = 0;
-
-  return res;
-}
-
 int main(void)
 {
   init_system();
 
-  //USART_ITConfig (USART1, USART_IT_RXNE, ENABLE);
+  input_q.head = NULL;
+  input_q.tail = NULL;
+
+  output_q.head = NULL;
+  output_q.tail = NULL;
+
+  USART_ITConfig (USART1, USART_IT_RXNE, ENABLE);
   while (1)
   {
-    do_cmd (get_next_packet ());
+    //if (input_q.head != NULL) do_cmd (QPop(&input_q));
   }
 
 }
