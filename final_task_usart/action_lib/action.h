@@ -3,7 +3,7 @@
 #define ACTION_H
 
 #include <stm32f4xx.h>
-//#include <periph.h>
+#include <periph.h>
 
 typedef struct {
   uint8_t  status;
