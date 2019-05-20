@@ -8,7 +8,7 @@ void EXTI0_IRQHandler (void)
     EXTI_ClearITPendingBit (EXTI_Line0);
     //тестовый пакет
     packet_t* p = (packet_t*) malloc(LEN_DATA_PACKET);
-    p->cmd = CMD_LedBrightInc;
+    p->cmd = CMD_TimStart;
     memset(p->params, 0, LEN_DATA_PARAM);
     QPush(&output_q, p);
     USART_ITConfig(USART1, USART_IT_TC, ENABLE);
@@ -37,14 +37,11 @@ void TIM3_IRQHandler(void)
 
 void USART1_IRQHandler()
 {
+  //прерывание по готовности передачи
   if (USART_GetITStatus(USART1, USART_IT_TC) != RESET)
   {
     USART_ClearITPendingBit(USART1, USART_IT_TC);
-    uint8_t data = 0xFF;
-    USART_SendData(USART1, data);
-    GPIO_SetBits(GPIOD, GPIO_Pin_15);
-    USART_ITConfig(USART1, USART_IT_TC, DISABLE);
-    /*
+
     static uint8_t SEND_PROGRESS = 0;
     static uint8_t send_data_cnt = 0;
     static uint8_t * p_out = NULL;
@@ -73,13 +70,12 @@ void USART1_IRQHandler()
             }
         }
     }
-    */
   }
-
+  //прерывание по приёму
   if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
   {
       USART_ClearITPendingBit(USART1, USART_IT_RXNE);
-      /*
+
       static uint8_t REC_PROGRESS = 0;
       static uint8_t rec_data_cnt = 0;
       static uint8_t * p_in = NULL;
@@ -106,10 +102,6 @@ void USART1_IRQHandler()
           REC_PROGRESS = 0;
         }
       } 
-      */
-      uint8_t data = USART_ReceiveData(USART1);
-      GPIO_SetBits(GPIOD, GPIO_Pin_15);
-      USART_ITConfig (USART1, USART_IT_RXNE, DISABLE);
   }
 }
 
@@ -123,7 +115,7 @@ uint8_t do_cmd (packet_t * packet)
     break;
 
     case CMD_LedBrightInc:
-      GPIO_SetBits(GPIOD, GPIO_Pin_15);//ToDo
+      ;//ToDo
     break;
 
     case CMD_LedBrightDec:
@@ -184,7 +176,8 @@ int main(void)
   USART_ITConfig (USART1, USART_IT_RXNE, ENABLE);
   while (1)
   {
-    //if (input_q.head != NULL) do_cmd (QPop(&input_q));
+    //если очередь на приём не пустая, то берём первый пакет
+    if (input_q.head != NULL) do_cmd (QPop(&input_q));
   }
 
 }

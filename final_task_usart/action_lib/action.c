@@ -2,11 +2,13 @@
 
 static sys_status_t system_status;
 
+//функция возвращения статуса системы
 sys_status_t get_status (void)
 {
   return system_status;
 }
 
+//функция инициализация переферии
 void init_system (void)
 {
   //init periph
@@ -32,7 +34,7 @@ void init_system (void)
   pwm_tim_enable();
 }
 
-
+//установка уровня яркости (в %) для выбранного светодиода
 uint8_t set_bright (led_t led, uint8_t val)
 {
   if (val > 100) return ERROR_CONST;
@@ -58,6 +60,7 @@ uint8_t set_bright (led_t led, uint8_t val)
   return OK_CONST;
 }
 
+//запуск таймеров для мигания диода
 void tim_start (void)
 {
   system_status.tim.status = 1;
@@ -66,6 +69,7 @@ void tim_start (void)
       duration_tim_enable();
 }
 
+//остановка таймеров для мигания диода
 void tim_stop (void)
 {
   system_status.tim.status = 0;
@@ -73,12 +77,14 @@ void tim_stop (void)
   duration_tim_disable();
 }
 
+//установка интервала между миганием диода
 void tim_set_interval (uint16_t val)
 {
   system_status.tim.interval = val;
   set_interval(val);
 }
 
+//установка времени в течении которого диод будет мигать
 void tim_set_duration (uint8_t val)
 {
   if (val == 0) {

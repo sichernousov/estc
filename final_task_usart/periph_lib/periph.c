@@ -1,5 +1,3 @@
-#ifndef PERIPH_C
-#define PERIPH_C
 
 #include <periph.h>
 
@@ -265,4 +263,3 @@ void duration_tim_disable (void) {
     TIM_Cmd (TIM3, DISABLE);
 }
 
-#endif
