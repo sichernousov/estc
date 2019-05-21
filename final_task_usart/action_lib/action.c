@@ -53,6 +53,8 @@ uint8_t set_bright (led_t led, uint8_t val)
         case led3:
           system_status.led3.bright = val;
         break;
+
+	default: return ERROR_CONST;
       }
   }
   else return ERROR_CONST;
@@ -92,7 +94,6 @@ void tim_set_duration (uint8_t val)
   }
   else {
     set_duration(val);
-    duration_tim_enable();
   }
   system_status.tim.duration = val;
 }

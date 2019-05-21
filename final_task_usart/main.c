@@ -46,11 +46,11 @@ void USART1_IRQHandler()
     static uint8_t send_data_cnt = 0;
     static uint8_t * p_out = NULL;
 
-    if ((output_q.head == NULL) && (SEND_PROGRESS != 0)) USART_ITConfig(USART1, USART_IT_TC, DISABLE);//???hz;
+    if ((output_q.head == NULL) && (SEND_PROGRESS != 0)) USART_ITConfig(USART1, USART_IT_TC, DISABLE);//если отправлять нечего
     else
     {
         //начало отправки нового пакета
-        if ((SEND_PROGRESS == 0) && (output_q.head != NULL))
+        if ((SEND_PROGRESS == 0) && (output_q.head != NULL)) //ToDo - работает если LEN_DATA_PACKET>1
         {
             send_data_cnt = 0;
             SEND_PROGRESS = 1;
@@ -167,16 +167,11 @@ int main(void)
 {
   init_system();
 
-  input_q.head = NULL;
-  input_q.tail = NULL;
-
-  output_q.head = NULL;
-  output_q.tail = NULL;
-
+  //включение прерывания по приходу новых данных на UART
   USART_ITConfig (USART1, USART_IT_RXNE, ENABLE);
   while (1)
   {
-    //если очередь на приём не пустая, то берём первый пакет
+    //если очередь на приём не пустая, то обрабатываем пришедшие пакеты
     if (input_q.head != NULL) do_cmd (QPop(&input_q));
   }
 
