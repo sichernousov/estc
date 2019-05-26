@@ -15,7 +15,10 @@ void init_system (void)
   init_leds();
   init_btns();
   init_tim();
-  init_usart();
+  MT_USART_Init();
+
+  MT_USART_WaitToTransmit = FALSE;
+  MT_USART_WaitToReceive = FALSE;
 
   //init struct
   system_status.led1.status = 0;
@@ -35,11 +38,11 @@ void init_system (void)
 }
 
 //установка уровня яркости (в %) для выбранного светодиода
-uint8_t set_bright (led_t led, uint8_t val)
+bool set_bright (led_t led, uint8_t val)
 {
-  if (val > 100) return ERROR_CONST;
+  if (val > 100) return FALSE;
   uint8_t tmp_val = 100 - val;
-  if (set_pulse(led, perc_to_pulse(tmp_val)) == OK_CONST) {
+  if (set_pulse(led, perc_to_pulse(tmp_val))) {
       switch (led)
       {
         case led1:
@@ -54,12 +57,12 @@ uint8_t set_bright (led_t led, uint8_t val)
           system_status.led3.bright = val;
         break;
 
-	default: return ERROR_CONST;
+        default: return FALSE;
       }
   }
-  else return ERROR_CONST;
+  else return FALSE;
 
-  return OK_CONST;
+  return TRUE;
 }
 
 //запуск таймеров для мигания диода

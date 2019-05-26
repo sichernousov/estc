@@ -3,7 +3,6 @@
 #define ACTION_H
 
 #include <stm32f4xx.h>
-#include <periph.h>
 
 typedef struct {
   uint8_t  status;
@@ -25,7 +24,7 @@ typedef struct {
 
 sys_status_t get_status (void);
 void init_system (void);
-uint8_t set_bright (led_t led, uint8_t val);
+bool set_bright (led_t led, uint8_t val);
 void tim_start (void);
 void tim_stop (void);
 void tim_set_interval (uint16_t val);

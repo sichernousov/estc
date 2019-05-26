@@ -1,7 +1,7 @@
 
 #include <periph.h>
 
-static const uint16_t g_pwm_tim_period = 100;
+static const uint16_t g_pwm_tim_period = 1000;
 static uint16_t g_interval_tim_period = TIM_PERIOD_1_SEC;
 static uint8_t g_dur_tim_sec = 10;
 
@@ -49,7 +49,7 @@ void init_btns(void)
     GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_DOWN;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-    /* Setup ext interrupts for button */
+    /*
     RCC_APB2PeriphClockCmd (RCC_APB2Periph_SYSCFG, ENABLE);
     SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
 
@@ -62,10 +62,11 @@ void init_btns(void)
 
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 9;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+    */
 }
 
 void init_tim(void)
@@ -82,7 +83,7 @@ void init_tim(void)
     TIM_TimeBaseInit (TIM2, &TIM_InitStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 10;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 8;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -96,7 +97,7 @@ void init_tim(void)
     TIM_TimeBaseInit (TIM3, &TIM_InitStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 10;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 7;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -107,7 +108,7 @@ void init_tim(void)
     TIM_OCInitTypeDef TIM_OCInitStructure;
     TIM_OCStructInit(&TIM_OCInitStructure);
 
-    TIM_InitStructure.TIM_Period = g_pwm_tim_period;
+    TIM_InitStructure.TIM_Period = g_pwm_tim_period + 1;
     TIM_InitStructure.TIM_Prescaler = 168 - 1;
     TIM_InitStructure.TIM_ClockDivision = 0;
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -131,52 +132,7 @@ void init_tim(void)
     TIM_Cmd (TIM4, ENABLE);
 }
 
-void init_usart(void)
-{
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
-
-    GPIO_InitTypeDef GPIO_InitStructure;
-    GPIO_StructInit(&GPIO_InitStructure);
-
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);
-    GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);
-    //TX
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_9;
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-    //RX
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_10;
-    GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    USART_InitTypeDef USART_InitStructure;
-    USART_StructInit(&USART_InitStructure);
-
-    USART_InitStructure.USART_BaudRate = 9600;// скорость
-    USART_InitStructure.USART_WordLength = USART_WordLength_8b; //8 бит данных
-    USART_InitStructure.USART_StopBits = USART_StopBits_1; //один стоп бит
-    USART_InitStructure.USART_Parity = USART_Parity_No; //четность - нет
-    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None; // управлени потоком - нет
-    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx; // разрешаем прием и передачу
-    USART_Init(USART1, &USART_InitStructure);
-
-    NVIC_InitTypeDef NVIC_InitStructure;
-    /* Enable the USARTx Interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn; //прерывание по uart1
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; //задаем приоритет в группе
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; //задаем приоритет в подгруппе
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; //разрешаем прерывание
-    NVIC_Init(&NVIC_InitStructure); //инициализируем
-
-    NVIC_EnableIRQ(USART1_IRQn);
-    USART_Cmd(USART1, ENABLE);
-}
-
-uint8_t set_pulse(led_t led, uint16_t value)
+bool set_pulse(led_t led, uint16_t value)
 {
     if (value <= g_pwm_tim_period)
     {
@@ -195,9 +151,9 @@ uint8_t set_pulse(led_t led, uint16_t value)
           break;
        }
     }
-    else return ERROR_CONST;
+    else return FALSE;
 
-    return OK_CONST;
+    return TRUE;
 }
 
 uint16_t perc_to_pulse(uint8_t percents)

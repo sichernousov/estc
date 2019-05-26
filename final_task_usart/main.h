@@ -2,55 +2,34 @@
 #define LEDS_AND_BUTTON_H
 
 #include <stm32f4xx.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <periph.c> //ToDo
+#include "general_types.h"
 
+#include <periph.c> //ToDo
+#include <MT_STM32F4xx_USART.c> //ToDo
 #include <action.c> //ToDo
 
-#define LEN_DATA_CMD    1
-#define LEN_DATA_PARAM  3
-#define MAX_NUM_PACKETS	16
+#define MAX_LEN_BUF  64
+#define END_CMD      '\n'
 
 typedef enum cmd_t{
-  CMD_LedBrightSet   = 0x01,
-  CMD_LedBrightInc   = 0x02,
-  CMD_LedBrightDec   = 0x03,
-  CMD_TimStart       = 0x04,
-  CMD_TimStop        = 0x05,
-  CMD_TimIntervalSet = 0x06,
-  CMD_TimIntervalInc = 0x07,
-  CMD_TimIntervalDec = 0x08,
-  CMD_TimDurationSet = 0x09,
-  CMD_TimDurationInc = 0x0A,
-  CMD_TimDurationDec = 0x0B
+  CMD_LedBrightSet   = '1',
+  CMD_TimStart       = '2',
+  CMD_TimStop        = '3',
+  CMD_TimIntervalSet = '4',
+  CMD_TimDurationSet = '5'
 } cmd_t;
 
-typedef struct {
-  uint8_t  cmd;
-  uint8_t  params[LEN_DATA_PARAM];
-} packet_t;
-#define LEN_DATA_PACKET (sizeof(packet_t))
+extern void EXTI0_IRQHandler(void);
+extern void TIM2_IRQHandler(void);
+extern void TIM3_IRQHandler(void);
 
-#include <queue.c> //ToDo
-
-TQueue input_q = {NULL, NULL} ;
-TQueue output_q = {NULL, NULL};
-
-//funcs
-uint8_t   do_cmd (packet_t * packet);
-
-/* #if defined (USE_STM324xG_EVAL) */
-/*   #include "stm324xg_eval.h" */
-
-/* #elif defined (USE_STM32F4DISC_EVAL) */
-/*   #include "stm32f4disc_eval.h" */
-
-/* #else */
-/*  #error "Please select first the Evaluation board used in your application (in Project Options)" */
-/* #endif */
-
-#include <math.h>
+void send_cmd(char* pbuf);
+void recieve_cmd_from_usart(char* pbuf);
+bool do_cmd (char * pbuf);
+uint32_t get_next_param(char * pbuf, uint8_t * i);
 
 #endif  /* LEDS_AND_BUTTON_H */

@@ -3,21 +3,14 @@
 
 #include <stm32f4xx.h>
 
-#define OK_CONST    0
-#define ERROR_CONST 1
 #define TIM_PERIOD_1_SEC 2000
-
-typedef enum led_t{
-  led1 = 1,
-  led2 = 2,
-  led3 = 3
-} led_t;
+#define MAX_DURATION     15
 
 void init_leds(void);
 void init_btns(void);
 void init_tim(void);
-void init_usart(void);
-uint8_t set_pulse(led_t led, uint16_t value);
+
+bool set_pulse(led_t led, uint16_t value);
 void set_duration(uint8_t val);
 void set_interval(uint16_t val);
 uint16_t perc_to_pulse(uint8_t percents);

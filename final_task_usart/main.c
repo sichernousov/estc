@@ -1,19 +1,6 @@
 #include "main.h"
 
-void EXTI0_IRQHandler (void)
-{
-  //если нажата кнопка
-  if (EXTI_GetITStatus (EXTI_Line0) != RESET)
-  {
-    EXTI_ClearITPendingBit (EXTI_Line0);
-    //тестовый пакет
-    packet_t* p = (packet_t*) malloc(LEN_DATA_PACKET);
-    p->cmd = CMD_TimStart;
-    memset(p->params, 0, LEN_DATA_PARAM);
-    QPush(&output_q, p);
-    USART_ITConfig(USART1, USART_IT_TC, ENABLE);
-  }
-}
+char buf_in [MAX_LEN_BUF+1];
 
 //interval timer handler
 void TIM2_IRQHandler(void)
@@ -35,91 +22,59 @@ void TIM3_IRQHandler(void)
   }
 }
 
-void USART1_IRQHandler()
+uint32_t get_next_param(char * pbuf, uint8_t * i)
 {
-  //прерывание по готовности передачи
-  if (USART_GetITStatus(USART1, USART_IT_TC) != RESET)
+  char tmp_buf[MAX_LEN_BUF+1];
+  char * tmp_ptr = pbuf + (*i);
+  uint8_t ind = *i;
+  uint32_t res = 0;
+
+  //если индекс некорректный
+  if (ind >= MAX_LEN_BUF)
+    return res;
+
+  //пропускаем символы не цифры
+  while ( (ind < MAX_LEN_BUF) && ((*tmp_ptr < '0') || (*tmp_ptr > '9')) )
   {
-    USART_ClearITPendingBit(USART1, USART_IT_TC);
-
-    static uint8_t SEND_PROGRESS = 0;
-    static uint8_t send_data_cnt = 0;
-    static uint8_t * p_out = NULL;
-
-    if ((output_q.head == NULL) && (SEND_PROGRESS != 0)) USART_ITConfig(USART1, USART_IT_TC, DISABLE);//если отправлять нечего
-    else
-    {
-        //начало отправки нового пакета
-        if ((SEND_PROGRESS == 0) && (output_q.head != NULL)) //ToDo - работает если LEN_DATA_PACKET>1
-        {
-            send_data_cnt = 0;
-            SEND_PROGRESS = 1;
-            p_out = (uint8_t *) QPop(&output_q);
-            USART_SendData(USART1, *(p_out + send_data_cnt));
-            send_data_cnt++;
-        }
-        //доотправка
-        else if (SEND_PROGRESS != 0)
-        {
-            USART_SendData(USART1, *(p_out + send_data_cnt));
-            send_data_cnt++;
-            if (send_data_cnt == LEN_DATA_PACKET)
-            {
-              free(p_out);
-              SEND_PROGRESS = 0;
-            }
-        }
-    }
+      tmp_ptr++;
+      ind++;
   }
-  //прерывание по приёму
-  if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
+
+  //если цифр не обнаружили
+  if (ind >= MAX_LEN_BUF)
+    return res;
+
+  //копируем последовательность цифр в tmp_buf
+  uint8_t j = 0;
+  while ((ind < MAX_LEN_BUF) && (*tmp_ptr >= '0') && (*tmp_ptr <= '9'))
   {
-      USART_ClearITPendingBit(USART1, USART_IT_RXNE);
-
-      static uint8_t REC_PROGRESS = 0;
-      static uint8_t rec_data_cnt = 0;
-      static uint8_t * p_in = NULL;
-
-      //начинаем принимать новый пакет
-      if (REC_PROGRESS == 0) //ToDo - работает если LEN_DATA_PACKET>1
-      {
-        rec_data_cnt = 0;
-        REC_PROGRESS = 1;
-
-        p_in = (uint8_t *) malloc(LEN_DATA_PACKET);
-
-        *(p_in + rec_data_cnt) = USART_ReceiveData(USART1);
-        rec_data_cnt++;
-      }
-      else 
-      {
-        //дополучаем
-        *(p_in + rec_data_cnt) = USART_ReceiveData(USART1);
-        rec_data_cnt++;
-        if (rec_data_cnt == LEN_DATA_PACKET)
-        {
-          QPush(&input_q, (packet_t*) p_in);
-          REC_PROGRESS = 0;
-        }
-      } 
+    tmp_buf[j] = *tmp_ptr;
+    ind++;
+    j++;
+    tmp_ptr++;
   }
+  //преобразуем последовательность цифр в число
+  tmp_buf[j] = '\0';
+  res = atoi (tmp_buf);
+  return res;
 }
 
-uint8_t do_cmd (packet_t * packet)
-{ 
-  uint8_t res = OK_CONST; 
-  switch (packet->cmd)
+bool do_cmd (char * pbuf)
+{
+  bool res = TRUE;
+  switch (*pbuf)
   {
     case CMD_LedBrightSet:
-      res = set_bright (packet->params[0], packet->params[1]);
-    break;
-
-    case CMD_LedBrightInc:
-      ;//ToDo
-    break;
-
-    case CMD_LedBrightDec:
-      ;//ToDo
+    {
+      uint8_t ind = 1;
+      uint32_t led_num = get_next_param(pbuf, &ind);
+      if (led_num == 0) GPIO_SetBits(GPIOD, GPIO_Pin_15);
+      uint32_t led_bright = get_next_param(pbuf, &ind);
+      if ((led_num > 0) && (led_num <= 3) && (led_bright <= 100))
+        set_bright ((uint8_t) led_num, (uint8_t) led_bright);
+      else
+        return FALSE;
+    }
     break;
 
     case CMD_TimStart:
@@ -131,48 +86,74 @@ uint8_t do_cmd (packet_t * packet)
     break;
 
     case CMD_TimIntervalSet:
-      tim_set_interval(*((uint16_t *) packet->params));
-    break;
-
-    case CMD_TimIntervalInc:
-      ;//ToDo
-    break;
-
-    case CMD_TimIntervalDec:
-      ;//ToDo
+    {
+      uint8_t ind = 1;
+      uint32_t interval = get_next_param(pbuf, &ind);
+      if (interval <= 0xFFFF)
+        tim_set_interval((uint16_t)interval);
+      else return FALSE;
+    }
     break;
 
     case CMD_TimDurationSet:
-      tim_set_duration (packet->params[0]);
-    break;
-
-    case CMD_TimDurationInc:
-      ;//ToDo
-    break;
-
-    case CMD_TimDurationDec:
-      ;//ToDo
+    {
+      uint8_t ind = 1;
+      uint32_t duration = get_next_param(pbuf, &ind);
+      if (duration <= MAX_DURATION)
+        tim_set_duration ((uint8_t)duration);
+      else return FALSE;
+    }
     break;
 
     default:
-      res = ERROR_CONST;
+      set_bright(led1, 100);
+      res = FALSE;
     break;
   }
-  free(packet);
-
   return res;
+}
+
+void clear_buf (char * buf) //because memset doesnt work
+{
+    for (int i = 0; i < MAX_LEN_BUF; i++)
+        *(buf+i) = '\0';
+    *(buf+MAX_LEN_BUF) = END_CMD;
 }
 
 int main(void)
 {
   init_system();
 
-  //включение прерывания по приходу новых данных на UART
-  USART_ITConfig (USART1, USART_IT_RXNE, ENABLE);
+  clear_buf(buf_in);
+
+  //test arrays
+  char buf_out[] = "2\n";
+  //char buf_out[] = "1 1 99\n";
+  //char buf_out[] = "1 2 99\n";
+  //char buf_out[] = "1 3 99\n";
+
+  MT_USART_ReceiveData(&buf_in, END_CMD);
   while (1)
   {
-    //если очередь на приём не пустая, то обрабатываем пришедшие пакеты
-    if (input_q.head != NULL) do_cmd (QPop(&input_q));
-  }
+    while(MT_USART_WaitToReceive && (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 0));
 
+    if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 1)
+    {
+      while (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 1);
+
+      USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+      MT_USART_SendData(&buf_out, END_CMD);
+      while(MT_USART_WaitToTransmit);
+      USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+
+      for (int j = 0; j < 100000; j++); //debounce
+    }
+
+    if (!MT_USART_WaitToReceive)
+    {
+        do_cmd(buf_in);
+        clear_buf (buf_in);
+        MT_USART_ReceiveData(&buf_in, END_CMD);
+    }
+  }
 }
