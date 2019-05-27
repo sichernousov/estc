@@ -1,4 +1,4 @@
-#include "MT_STM32F4xx_USART.h"
+#include <MT_USART.h>
 
 GPIO_InitTypeDef MT_USART_CfgGPIO;
 USART_InitTypeDef MT_USART_CfgUSART;
@@ -37,7 +37,7 @@ void MT_USART_Init()
 	MT_USART_CfgGPIO.GPIO_Speed = GPIO_Speed_50MHz;
 	MT_USART_CfgGPIO.GPIO_OType = GPIO_OType_PP;
 	MT_USART_CfgGPIO.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(GPIOA, &MT_USART_CfgGPIO);
+        GPIO_Init(GPIOA, &MT_USART_CfgGPIO);
 	
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
 	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
@@ -53,11 +53,11 @@ void MT_USART_Init()
 
 void MT_USART_SendData(uint8_t *pSendData, char barrier)
 {
-	MT_USART_SendDataPtr = pSendData;
+    MT_USART_SendDataPtr = pSendData;
     MT_USART_SendBarrier = barrier;
     MT_USART_WaitToTransmit = TRUE;
 	
-	USART_ITConfig(USART2, USART_IT_TC, ENABLE);	
+    USART_ITConfig(USART2, USART_IT_TC, ENABLE);	
 }
 
 void MT_USART_ReceiveData(uint8_t* pReceivedData, char barrier)
@@ -66,7 +66,7 @@ void MT_USART_ReceiveData(uint8_t* pReceivedData, char barrier)
     MT_USART_ReceiveBarrier = barrier;
     MT_USART_WaitToReceive = TRUE;
 	
-	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+    USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 }
 
 void USART2_IRQHandler()

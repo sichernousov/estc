@@ -22,6 +22,7 @@ void TIM3_IRQHandler(void)
   }
 }
 
+//функция возвращает следующее (с индекса i) числовое значение из символьного буфера
 uint32_t get_next_param(char * pbuf, uint8_t * i)
 {
   char tmp_buf[MAX_LEN_BUF+1];
@@ -61,6 +62,7 @@ uint32_t get_next_param(char * pbuf, uint8_t * i)
 
 bool do_cmd (char * pbuf)
 {
+  //выполняем команду из символьного буфера
   bool res = TRUE;
   switch (*pbuf)
   {
@@ -113,6 +115,113 @@ bool do_cmd (char * pbuf)
   return res;
 }
 
+void send_cmd_set_bright (uint8_t led_num, uint8_t value)
+{
+  char buf_out[16];
+  uint8_t i = 0; 
+  
+  buf_out[i] = CMD_LedBrightSet; 
+  i++;
+  
+  buf_out[i] = ' '; 
+  i++;
+   
+  itoa(led_num, &(buf_out[i]), 10);
+  while ((buf_out[i] >= '0') && (buf_out[i] <= '9')) i++;
+
+  buf_out[i] = ' ';
+  i++;
+
+  itoa(value, &(buf_out[i]), 10);
+  while ((buf_out[i] >= '0') && (buf_out[i] <= '9')) i++;
+
+  buf_out[i] = END_CMD;
+
+  USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+  MT_USART_SendData((uint8_t *)buf_out, END_CMD);
+  while(MT_USART_WaitToTransmit);
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+}
+
+void send_cmd_tim_start(void)
+{
+  char buf_out[2];
+  buf_out[0] = CMD_TimStart;
+  buf_out[1] = END_CMD;
+
+  USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+  MT_USART_SendData((uint8_t *)buf_out, END_CMD);
+  while(MT_USART_WaitToTransmit);
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+}
+
+void send_cmd_tim_stop(void)
+{
+  char buf_out[2];
+  buf_out[0] = CMD_TimStop;
+  buf_out[1] = END_CMD;
+
+  USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+  MT_USART_SendData((uint8_t *)buf_out, END_CMD);
+  while(MT_USART_WaitToTransmit);
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+}
+
+void send_cmd_set_interval (uint16_t value)
+{
+  char buf_out[16];
+  uint8_t i = 0; 
+
+  buf_out[i] = CMD_TimIntervalSet;
+  i++;
+
+  buf_out[i] = ' ';
+  i++;
+
+  itoa(value, &(buf_out[i]), 10);
+  while ((buf_out[i] >= '0') && (buf_out[i] <= '9')) i++;
+  buf_out[i] = END_CMD;
+
+  USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+  MT_USART_SendData((uint8_t *)buf_out, END_CMD);
+  while(MT_USART_WaitToTransmit);
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+}
+
+void send_cmd_set_duration(uint8_t value)
+{
+  char buf_out[16];
+  uint8_t i = 0; 
+
+  buf_out[i] = CMD_TimDurationSet;
+  i++;
+
+  buf_out[i] = ' ';
+  i++; 
+
+  itoa(value, &(buf_out[i]), 10);
+  while ((buf_out[i] >= '0') && (buf_out[i] <= '9')) i++;
+  buf_out[i] = END_CMD;
+
+  USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+  MT_USART_SendData((uint8_t *)buf_out, END_CMD);
+  while(MT_USART_WaitToTransmit);
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+}
+
+void send_cmd_get_status(void)
+{
+  char buf_out[2];
+  buf_out[0] = CMD_GetStatus;
+  buf_out[1] = END_CMD; 
+  
+  USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
+  MT_USART_SendData((uint8_t *)buf_out, END_CMD);
+  while(MT_USART_WaitToTransmit);
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+  
+}
+
 void clear_buf (char * buf) //because memset doesnt work
 {
     for (int i = 0; i < MAX_LEN_BUF; i++)
@@ -126,34 +235,44 @@ int main(void)
 
   clear_buf(buf_in);
 
-  //test arrays
-  char buf_out[] = "2\n";
-  //char buf_out[] = "1 1 99\n";
-  //char buf_out[] = "1 2 99\n";
-  //char buf_out[] = "1 3 99\n";
-
-  MT_USART_ReceiveData(&buf_in, END_CMD);
+  MT_USART_ReceiveData((uint8_t *)buf_in, END_CMD);
   while (1)
   {
-    while(MT_USART_WaitToReceive && (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 0));
+    //ждем приема пакета или нажатия любой из кнопки
+    while (MT_USART_WaitToReceive && (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 0) && (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 1) 
+            && (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_0) == 1));
 
+    //обработчики кнопок 
+    //chip btn
     if (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 1)
     {
       while (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == 1);
-
-      USART_ITConfig(USART2, USART_IT_RXNE, DISABLE);
-      MT_USART_SendData(&buf_out, END_CMD);
-      while(MT_USART_WaitToTransmit);
-      USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-
+      send_cmd_tim_start();
       for (int j = 0; j < 100000; j++); //debounce
     }
 
+    //advance btn#0
+    if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_0) == 0)
+    {
+      while (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_0) == 0);   
+      send_cmd_set_bright (led1, 100);
+      for (int j = 0; j < 100000; j++); //debounce
+    }
+
+    //advance btn#1
+    if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 0)
+    {
+      while (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 0);
+      send_cmd_set_bright (led3, 100);
+      for (int j = 0; j < 100000; j++); //debounce
+    }
+
+    //если пришла команда, то обрабатываем её и ожидаем новую
     if (!MT_USART_WaitToReceive)
     {
         do_cmd(buf_in);
         clear_buf (buf_in);
-        MT_USART_ReceiveData(&buf_in, END_CMD);
+        MT_USART_ReceiveData((uint8_t *)buf_in, END_CMD);
     }
   }
 }
