@@ -11,4 +11,7 @@
 #include "action.h" 
 #include "cmd.h"
 
+extern void TIM2_IRQHandler(void);
+extern void TIM3_IRQHandler(void);
+
 #endif  /* LEDS_AND_BUTTON_H */

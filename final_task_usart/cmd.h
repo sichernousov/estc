@@ -26,12 +26,8 @@ typedef enum cmd_t{
   CMD_WrongCmd       = '8'
 } cmd_t;
 
-extern void TIM2_IRQHandler(void);
-extern void TIM3_IRQHandler(void);
 
 bool do_cmd (char * pbuf);
-uint32_t get_next_param(char * pbuf, uint8_t * i);
-void clear_buf (char * buf);
 
 void send_cmd_set_bright (uint8_t led_num, uint8_t value);
 void send_cmd_tim_start(void);
@@ -40,5 +36,8 @@ void send_cmd_set_interval (uint16_t value);
 void send_cmd_set_duration(uint8_t value);
 void send_cmd_get_status(void);
 void send_cmd_wrong_cmd(void);
+
+void clear_buf (char * buf);
+uint32_t get_next_param(char * pbuf, uint8_t * i);
 
 #endif

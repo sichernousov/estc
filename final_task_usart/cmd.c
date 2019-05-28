@@ -246,7 +246,7 @@ void send_cmd_wrong_cmd(void)
 
 void clear_buf (char * buf)
 {
-    for (int i = 0; i < MAX_LEN_BUF; i++)
-        *(buf+i) = '\0';
-    *(buf+MAX_LEN_BUF) = END_CMD;
+  for (int i = 0; i < MAX_LEN_BUF; i++)
+    *(buf+i) = '\0';
+  *(buf+MAX_LEN_BUF) = END_CMD;
 }
