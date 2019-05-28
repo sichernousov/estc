@@ -3,6 +3,9 @@
 #define ACTION_H
 
 #include <stm32f4xx.h>
+#include "general_types.h"
+#include "periph.h"
+#include "MT_USART.h"
 
 typedef struct {
   uint8_t  status;

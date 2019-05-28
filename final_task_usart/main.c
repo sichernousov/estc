@@ -117,7 +117,7 @@ bool do_cmd (char * pbuf)
 
 void send_cmd_set_bright (uint8_t led_num, uint8_t value)
 {
-  char buf_out[16];
+  char buf_out[MAX_LEN_BUF];
   uint8_t i = 0; 
   
   buf_out[i] = CMD_LedBrightSet; 
@@ -169,7 +169,7 @@ void send_cmd_tim_stop(void)
 
 void send_cmd_set_interval (uint16_t value)
 {
-  char buf_out[16];
+  char buf_out[MAX_LEN_BUF];
   uint8_t i = 0; 
 
   buf_out[i] = CMD_TimIntervalSet;
@@ -190,7 +190,7 @@ void send_cmd_set_interval (uint16_t value)
 
 void send_cmd_set_duration(uint8_t value)
 {
-  char buf_out[16];
+  char buf_out[MAX_LEN_BUF];
   uint8_t i = 0; 
 
   buf_out[i] = CMD_TimDurationSet;

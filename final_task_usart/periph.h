@@ -2,6 +2,7 @@
 #define PERIPH_H
 
 #include <stm32f4xx.h>
+#include "general_types.h"
 
 #define TIM_PERIOD_1_SEC 2000
 #define MAX_DURATION     15

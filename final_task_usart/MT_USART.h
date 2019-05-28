@@ -2,9 +2,10 @@
 #define MT_USART_H
 
 #include <stm32f4xx.h>
+#include "general_types.h"
 
 //Set USART baudrate
-#define MT_USART_BAUDRATE										(9600)
+#define MT_USART_BAUDRATE (9600)
 
 // Global variables
 extern bool MT_USART_WaitToTransmit;

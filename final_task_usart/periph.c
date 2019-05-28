@@ -1,5 +1,4 @@
-
-#include <periph.h>
+#include "periph.h"
 
 static const uint16_t g_pwm_tim_period = 1000;
 static uint16_t g_interval_tim_period = TIM_PERIOD_1_SEC;

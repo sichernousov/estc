@@ -1,20 +1,14 @@
 BUILD_ROOT=../../..
-OBJS = main.o
-
-BINARY_NAME = main
-
-INCLUDE_DIRS += -I$(BUILD_ROOT)/projects/estc/final_task_usart/action_lib
-INCLUDE_DIRS += -I$(BUILD_ROOT)/projects/estc/final_task_usart/periph_lib
-INCLUDE_DIRS += -I$(BUILD_ROOT)/projects/estc/final_task_usart/uart_lib
+OBJS = periph.o action.o MT_USART.o main.o
 
 include $(BUILD_ROOT)/common_defs.mk
 
-.PHONY: $(BINARY_NAME)
+.PHONY: main uart_lib/MT_USART periph_lib/periph action_lib/action
 
-$(BINARY_NAME): $(BINARY_NAME).bin 
+main: main.bin
 
 clean:
-	@rm -f $(OBJS) main.elf main.bin main.elf.map
+	@rm -f $(OBJS) main.elf main.bin main.elf.map *.d
 
 flash: $(BINARY_NAME)
 	$(FLASH_BINARY)

@@ -6,9 +6,9 @@
 
 #include "general_types.h"
 
-#include <periph.c> //ToDo
-#include <MT_USART.c> //ToDo
-#include <action.c> //ToDo
+#include "periph.h" 
+#include "MT_USART.h" 
+#include "action.h" 
 
 #define MAX_LEN_BUF  64
 #define END_CMD      '\n'
