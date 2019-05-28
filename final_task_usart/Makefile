@@ -1,5 +1,5 @@
 BUILD_ROOT=../../..
-OBJS = periph.o action.o MT_USART.o main.o
+OBJS = periph.o MT_USART.o action.o main.o
 
 include $(BUILD_ROOT)/common_defs.mk
 

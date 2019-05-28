@@ -107,6 +107,38 @@ bool do_cmd (char * pbuf)
     }
     break;
 
+    case CMD_GetStatus:
+    {
+     //ToDo
+    }
+    break;
+
+    case CMD_RecieveStatus:
+    {
+     //ToDo
+    }
+    break;
+
+    case CMD_WrongCmd:
+    {
+     //если вторая плата просигнализировала об ошибке:
+     while (1)
+     {
+       set_bright(led1, 100);
+       set_bright(led2, 100);
+       set_bright(led3, 100);
+      
+       for (int i = 0; i < 500000; i++);
+
+       set_bright(led1, 0);
+       set_bright(led2, 0);
+       set_bright(led3, 0);
+
+       for (int i = 0; i < 500000; i++);
+     }
+    }
+    break;
+
     default:
       set_bright(led1, 100);
       res = FALSE;
@@ -118,6 +150,7 @@ bool do_cmd (char * pbuf)
 void send_cmd_set_bright (uint8_t led_num, uint8_t value)
 {
   char buf_out[MAX_LEN_BUF];
+  clear_buf(buf_out);
   uint8_t i = 0; 
   
   buf_out[i] = CMD_LedBrightSet; 
@@ -170,6 +203,7 @@ void send_cmd_tim_stop(void)
 void send_cmd_set_interval (uint16_t value)
 {
   char buf_out[MAX_LEN_BUF];
+  clear_buf(buf_out);
   uint8_t i = 0; 
 
   buf_out[i] = CMD_TimIntervalSet;
@@ -190,7 +224,8 @@ void send_cmd_set_interval (uint16_t value)
 
 void send_cmd_set_duration(uint8_t value)
 {
-  char buf_out[MAX_LEN_BUF];
+  char buf_out[MAX_LEN_BUF+1];
+  clear_buf(buf_out);
   uint8_t i = 0; 
 
   buf_out[i] = CMD_TimDurationSet;
@@ -222,7 +257,17 @@ void send_cmd_get_status(void)
   
 }
 
-void clear_buf (char * buf) //because memset doesnt work
+void send_cmd_wrong_cmd(void)
+{
+  char buf_out[2];
+  buf_out[0] = CMD_WrongCmd;
+  buf_out[1] = END_CMD; 
+  
+  MT_USART_SendData((uint8_t *)buf_out, END_CMD);
+  while(MT_USART_WaitToTransmit);
+}
+
+void clear_buf (char * buf)
 {
     for (int i = 0; i < MAX_LEN_BUF; i++)
         *(buf+i) = '\0';
@@ -270,7 +315,7 @@ int main(void)
     //если пришла команда, то обрабатываем её и ожидаем новую
     if (!MT_USART_WaitToReceive)
     {
-        do_cmd(buf_in);
+        if (!do_cmd(buf_in)) send_cmd_wrong_cmd();
         clear_buf (buf_in);
         MT_USART_ReceiveData((uint8_t *)buf_in, END_CMD);
     }
