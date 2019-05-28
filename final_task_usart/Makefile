@@ -1,10 +1,10 @@
 BUILD_ROOT=../../..
-OBJS = periph.o MT_USART.o action.o main.o
+OBJS = periph.o MT_USART.o action.o cmd.o main.o
 BINARY_NAME = main
 
 include $(BUILD_ROOT)/common_defs.mk
 
-.PHONY: main uart_lib/MT_USART periph_lib/periph action_lib/action
+.PHONY: main
 
 $(BINARY_NAME): $(BINARY_NAME).bin
 

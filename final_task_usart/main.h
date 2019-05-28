@@ -9,34 +9,6 @@
 #include "periph.h" 
 #include "MT_USART.h" 
 #include "action.h" 
-
-#define MAX_LEN_BUF  64
-#define END_CMD      '\n'
-
-typedef enum cmd_t{
-  CMD_LedBrightSet   = '1',
-  CMD_TimStart       = '2',
-  CMD_TimStop        = '3',
-  CMD_TimIntervalSet = '4',
-  CMD_TimDurationSet = '5',
-  CMD_GetStatus      = '6',
-  CMD_RecieveStatus  = '7',
-  CMD_WrongCmd       = '8'
-} cmd_t;
-
-extern void TIM2_IRQHandler(void);
-extern void TIM3_IRQHandler(void);
-
-bool do_cmd (char * pbuf);
-uint32_t get_next_param(char * pbuf, uint8_t * i);
-void clear_buf (char * buf);
-
-void send_cmd_set_bright (uint8_t led_num, uint8_t value);
-void send_cmd_tim_start(void);
-void send_cmd_tim_stop(void);
-void send_cmd_set_interval (uint16_t value);
-void send_cmd_set_duration(uint8_t value);
-void send_cmd_get_status(void);
-void send_cmd_wrong_cmd(void);
+#include "cmd.h"
 
 #endif  /* LEDS_AND_BUTTON_H */

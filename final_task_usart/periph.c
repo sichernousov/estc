@@ -181,6 +181,7 @@ void pwm_tim_disable (void) {
 
 void interval_tim_enable (void) {
     //TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+    TIM2->CNT = 0;
     TIM_Cmd (TIM2, ENABLE);
 }
 
@@ -191,6 +192,7 @@ void interval_tim_disable (void) {
 
 void duration_tim_enable (void) {
     //TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+    TIM3->CNT = 0;
     TIM_Cmd (TIM3, ENABLE);
 }
 
