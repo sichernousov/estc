@@ -1,6 +1,6 @@
 #include "periph.h"
 
-static const uint16_t g_pwm_tim_period = 1000;
+static const uint16_t g_pwm_tim_period = 40000;
 static uint16_t g_interval_tim_period = TIM_PERIOD_1_SEC;
 static uint8_t g_dur_tim_sec = 10;
 
@@ -71,12 +71,14 @@ void init_tim(void)
     TIM_InitStructure.TIM_ClockDivision = 0;
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit (TIM2, &TIM_InitStructure);
+    TIM2->CR1 = TIM2->CR1 & ~(1 << 7); 
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 8;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
+    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
 
     //Duration Timer (TIM3)
     RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM3, ENABLE);
@@ -85,13 +87,15 @@ void init_tim(void)
     TIM_InitStructure.TIM_ClockDivision = 0;
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit (TIM3, &TIM_InitStructure);
+    TIM3->CR1 = TIM3->CR1 & ~(1 << 7);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 7;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-
+    TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+     
     //PWM Timer (TIM4)
     RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM4, ENABLE);
 
@@ -99,7 +103,7 @@ void init_tim(void)
     TIM_OCStructInit(&TIM_OCInitStructure);
 
     TIM_InitStructure.TIM_Period = g_pwm_tim_period + 1;
-    TIM_InitStructure.TIM_Prescaler = 168 - 1;
+    TIM_InitStructure.TIM_Prescaler = 4 - 1; //168-1
     TIM_InitStructure.TIM_ClockDivision = 0;
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
     TIM_TimeBaseInit (TIM4, &TIM_InitStructure);
@@ -151,32 +155,20 @@ uint16_t perc_to_pulse(uint8_t percents)
     return (g_pwm_tim_period / 100 * percents);
 }
 
+void set_interval(uint16_t val)
+{
+    g_interval_tim_period = val;
+    TIM2->ARR = g_interval_tim_period;
+    TIM2->CNT = 0;
+}
+
 void set_duration(uint8_t val)
 {
    g_dur_tim_sec = val;
    if (val > 0) {
-       TIM_SetCounter(TIM3, 0);
-
-       TIM_TimeBaseInitTypeDef TIM_InitStructure;
-       TIM_InitStructure.TIM_Period = (g_dur_tim_sec * TIM_PERIOD_1_SEC) - 1;
-       TIM_InitStructure.TIM_Prescaler = 42000 - 1; //500us
-       TIM_InitStructure.TIM_ClockDivision = 0;
-       TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-       TIM_TimeBaseInit (TIM3, &TIM_InitStructure);
+       TIM3->ARR = (g_dur_tim_sec * TIM_PERIOD_1_SEC) - 1;
+       TIM3->CNT = 0;
    }
-}
-
-void set_interval(uint16_t val)
-{
-    g_interval_tim_period = val;
-    TIM_SetCounter(TIM2, 0);
-
-    TIM_TimeBaseInitTypeDef TIM_InitStructure;
-    TIM_InitStructure.TIM_Period = g_interval_tim_period - 1;
-    TIM_InitStructure.TIM_Prescaler = 42000 - 1; //500us
-    TIM_InitStructure.TIM_ClockDivision = 0;
-    TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit (TIM3, &TIM_InitStructure);
 }
 
 void pwm_tim_enable (void) {
@@ -188,24 +180,22 @@ void pwm_tim_disable (void) {
 }
 
 void interval_tim_enable (void) {
-    TIM_SetCounter(TIM2, 0);
-    TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
+    //TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
     TIM_Cmd (TIM2, ENABLE);
 }
 
 void interval_tim_disable (void) {
-    TIM_ITConfig(TIM2, TIM_IT_Update, DISABLE);
+    //TIM_ITConfig(TIM2, TIM_IT_Update, DISABLE);
     TIM_Cmd (TIM2, DISABLE);
 }
 
 void duration_tim_enable (void) {
-    TIM_SetCounter(TIM3, 0);
-    TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+    //TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
     TIM_Cmd (TIM3, ENABLE);
 }
 
 void duration_tim_disable (void) {
-    TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
+    //TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
     TIM_Cmd (TIM3, DISABLE);
 }
 

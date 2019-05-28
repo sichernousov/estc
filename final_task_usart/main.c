@@ -27,30 +27,29 @@ uint32_t get_next_param(char * pbuf, uint8_t * i)
 {
   char tmp_buf[MAX_LEN_BUF+1];
   char * tmp_ptr = pbuf + (*i);
-  uint8_t ind = *i;
   uint32_t res = 0;
 
   //если индекс некорректный
-  if (ind >= MAX_LEN_BUF)
+  if (*i >= MAX_LEN_BUF)
     return res;
 
   //пропускаем символы не цифры
-  while ( (ind < MAX_LEN_BUF) && ((*tmp_ptr < '0') || (*tmp_ptr > '9')) )
+  while ( (*i < MAX_LEN_BUF) && ((*tmp_ptr < '0') || (*tmp_ptr > '9')) )
   {
       tmp_ptr++;
-      ind++;
+      (*i)++;
   }
 
   //если цифр не обнаружили
-  if (ind >= MAX_LEN_BUF)
+  if (*i >= MAX_LEN_BUF)
     return res;
 
   //копируем последовательность цифр в tmp_buf
   uint8_t j = 0;
-  while ((ind < MAX_LEN_BUF) && (*tmp_ptr >= '0') && (*tmp_ptr <= '9'))
+  while ((*i < MAX_LEN_BUF) && (*tmp_ptr >= '0') && (*tmp_ptr <= '9'))
   {
     tmp_buf[j] = *tmp_ptr;
-    ind++;
+    (*i)++;
     j++;
     tmp_ptr++;
   }
@@ -70,8 +69,8 @@ bool do_cmd (char * pbuf)
     {
       uint8_t ind = 1;
       uint32_t led_num = get_next_param(pbuf, &ind);
-      if (led_num == 0) GPIO_SetBits(GPIOD, GPIO_Pin_15);
       uint32_t led_bright = get_next_param(pbuf, &ind);
+
       if ((led_num > 0) && (led_num <= 3) && (led_bright <= 100))
         set_bright ((uint8_t) led_num, (uint8_t) led_bright);
       else
@@ -300,7 +299,7 @@ int main(void)
     if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_0) == 0)
     {
       while (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_0) == 0);   
-      send_cmd_set_bright (led1, 100);
+      send_cmd_set_interval(TIM_PERIOD_1_SEC);
       for (int j = 0; j < 100000; j++); //debounce
     }
 
@@ -308,7 +307,7 @@ int main(void)
     if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 0)
     {
       while (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 0);
-      send_cmd_set_bright (led3, 100);
+      send_cmd_set_interval (TIM_PERIOD_1_SEC*3);
       for (int j = 0; j < 100000; j++); //debounce
     }
 

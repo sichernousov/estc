@@ -72,6 +72,7 @@ void tim_start (void)
   interval_tim_enable();
   if (system_status.tim.duration > 0)
       duration_tim_enable();
+  GPIO_SetBits(GPIOD, GPIO_Pin_15);
 }
 
 //остановка таймеров для мигания диода
@@ -80,6 +81,7 @@ void tim_stop (void)
   system_status.tim.status = 0;
   interval_tim_disable();
   duration_tim_disable();
+  GPIO_ResetBits(GPIOD, GPIO_Pin_15);
 }
 
 //установка интервала между миганием диода
@@ -92,11 +94,12 @@ void tim_set_interval (uint16_t val)
 //установка времени в течении которого диод будет мигать
 void tim_set_duration (uint8_t val)
 {
+  system_status.tim.duration = val;
   if (val == 0) {
     duration_tim_disable();
   }
   else {
-    set_duration(val);
+    set_duration(val);    
+    if (system_status.tim.status == 1) duration_tim_enable();
   }
-  system_status.tim.duration = val;
 }

@@ -4,7 +4,7 @@
 #include <stm32f4xx.h>
 #include "general_types.h"
 
-#define TIM_PERIOD_1_SEC 2000
+#define TIM_PERIOD_1_SEC 700
 #define MAX_DURATION     15
 
 void init_leds(void);
