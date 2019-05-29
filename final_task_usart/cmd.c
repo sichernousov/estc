@@ -86,13 +86,42 @@ bool do_cmd (char * pbuf)
 
     case CMD_GetStatus:
     {
-     //ToDo
+      sys_status_t curstat = get_status();
+      send_status(&curstat);
     }
     break;
 
     case CMD_RecieveStatus:
     {
-     //ToDo
+      sys_status_t rec_stat;
+      uint32_t tmp_val;
+      uint8_t ind = 1;
+
+      tmp_val = get_next_param(pbuf, &ind);
+      if (tmp_val <= 100) rec_stat.led1.bright = (uint8_t) tmp_val;
+      else return FALSE;
+
+      tmp_val = get_next_param(pbuf, &ind);
+      if (tmp_val <= 100) rec_stat.led2.bright = (uint8_t) tmp_val;
+      else return FALSE;
+
+      tmp_val = get_next_param(pbuf, &ind);
+      if (tmp_val <= 100) rec_stat.led3.bright = (uint8_t) tmp_val;
+      else return FALSE;
+
+      tmp_val = get_next_param(pbuf, &ind);
+      if (tmp_val <= 1) rec_stat.tim.status = (uint8_t) tmp_val;
+      else return FALSE;
+
+      tmp_val = get_next_param(pbuf, &ind);
+      if (tmp_val <= 0xFFFF) rec_stat.tim.interval = (uint16_t) tmp_val;
+      else return FALSE;
+ 
+      tmp_val = get_next_param(pbuf, &ind);
+      if (tmp_val <= MAX_DURATION) rec_stat.tim.duration = (uint8_t) tmp_val;
+      else return FALSE;
+
+      if (rec_stat.tim.duration == 0) return FALSE; //workaround
     }
     break;
 
@@ -232,6 +261,57 @@ void send_cmd_get_status(void)
   while(MT_USART_WaitToTransmit);
   USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
   
+}
+
+void send_status(sys_status_t * pstat)
+{
+  char buf_out[MAX_LEN_BUF+1];
+  clear_buf(buf_out);
+  uint8_t i = 0;
+
+  buf_out[i] = CMD_RecieveStatus;
+  i++;
+
+  buf_out[i] = ' ';
+  i++; 
+
+  itoa(pstat->led1.bright, &(buf_out[i]), 10);
+  while ((buf_out[i] >= '0') && (buf_out[i] <= '9')) i++;
+
+  buf_out[i] = ' ';
+  i++; 
+
+  itoa(pstat->led2.bright, &(buf_out[i]), 10);
+  while ((buf_out[i] >= '0') && (buf_out[i] <= '9')) i++;
+
+  buf_out[i] = ' ';
+  i++;
+
+  itoa(pstat->led3.bright, &(buf_out[i]), 10);
+  while ((buf_out[i] >= '0') && (buf_out[i] <= '9')) i++;
+
+  buf_out[i] = ' ';
+  i++;
+
+  itoa(pstat->tim.status, &(buf_out[i]), 10);
+  while ((buf_out[i] >= '0') && (buf_out[i] <= '9')) i++;
+
+  buf_out[i] = ' ';
+  i++;
+
+  itoa(pstat->tim.interval, &(buf_out[i]), 10);
+  while ((buf_out[i] >= '0') && (buf_out[i] <= '9')) i++;
+
+  buf_out[i] = ' ';
+  i++;
+
+  itoa(pstat->tim.duration, &(buf_out[i]), 10);
+  while ((buf_out[i] >= '0') && (buf_out[i] <= '9')) i++;
+
+  buf_out[i] = END_CMD;
+
+  MT_USART_SendData((uint8_t *)buf_out, END_CMD);
+  while(MT_USART_WaitToTransmit);
 }
 
 void send_cmd_wrong_cmd(void)

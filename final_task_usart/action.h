@@ -8,7 +8,7 @@
 #include "MT_USART.h"
 
 typedef struct {
-  uint8_t  status;
+  //uint8_t  status;
   uint32_t bright;
 } led_status_t;
 

@@ -35,6 +35,7 @@ void send_cmd_tim_stop(void);
 void send_cmd_set_interval (uint16_t value);
 void send_cmd_set_duration(uint8_t value);
 void send_cmd_get_status(void);
+void send_status(sys_status_t * pstat);
 void send_cmd_wrong_cmd(void);
 
 void clear_buf (char * buf);

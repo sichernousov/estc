@@ -21,15 +21,9 @@ void init_system (void)
   MT_USART_WaitToReceive = FALSE;
 
   //init struct
-  system_status.led1.status = 0;
   system_status.led1.bright = 0;
-
-  system_status.led2.status = 0;
   system_status.led2.bright = 0;
-
-  system_status.led3.status = 0;
   system_status.led3.bright = 0;
-
   system_status.tim.status = 0;
   system_status.tim.interval = TIM_PERIOD_1_SEC;
   system_status.tim.duration = 0;
