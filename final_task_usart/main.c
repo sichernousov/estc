@@ -54,6 +54,8 @@ int main(void)
       send_cmd_set_bright (led1, 100);
       send_cmd_set_bright (led2, 100);
       send_cmd_set_bright (led3, 100);
+      send_cmd_set_interval (TIM_PERIOD_1_SEC/2);
+      send_cmd_set_duration (6);
       for (int j = 0; j < 100000; j++); //debounce
     }
 
@@ -61,8 +63,7 @@ int main(void)
     if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 0)
     {
       while (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 0);
-      send_cmd_set_interval (TIM_PERIOD_1_SEC*2);
-      send_cmd_set_duration (6);
+      send_cmd_get_status();
       for (int j = 0; j < 100000; j++); //debounce
     }
 

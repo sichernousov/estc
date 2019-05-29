@@ -121,7 +121,14 @@ bool do_cmd (char * pbuf)
       if (tmp_val <= MAX_DURATION) rec_stat.tim.duration = (uint8_t) tmp_val;
       else return FALSE;
 
-      if (rec_stat.tim.duration == 0) return FALSE; //workaround
+      //this block for tests
+      if (rec_stat.tim.duration != 6) return FALSE; 
+      else 
+      {
+        set_bright (led1, 50);
+        set_bright (led2, 50);
+        set_bright (led3, 50);
+      }
     }
     break;
 
