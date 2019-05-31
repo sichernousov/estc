@@ -63,6 +63,7 @@ int main(void)
     if (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 0)
     {
       while (GPIO_ReadInputDataBit(GPIOE, GPIO_Pin_1) == 0);
+      //для теста: если вернется статус, где duration != 6, плата просигнализирует об ошибке
       send_cmd_get_status();
       for (int j = 0; j < 100000; j++); //debounce
     }
